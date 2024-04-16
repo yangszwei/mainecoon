@@ -1,0 +1,18 @@
+#!/bin/sh
+#
+# Pre-commit hook to run checks before committing changes.
+
+# Check that the code conforms to the style guide
+if ! npm run lint --silent; then
+  echo "Lint check failed. Please fix linting errors and try again."
+  exit 1
+fi
+
+# Check that the code is typed correctly
+if ! npm run check --silent; then
+  echo "Type check failed. Please fix type errors and try again."
+  exit 1
+fi
+
+# If all checks passed, exit successfully
+exit 0
