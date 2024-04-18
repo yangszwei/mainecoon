@@ -4,6 +4,10 @@
 	import '../app.css';
 </script>
 
+<svelte:head>
+	<title>MaineCoon</title>
+</svelte:head>
+
 <slot />
 
 <style lang="postcss">

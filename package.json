@@ -18,6 +18,8 @@
 	},
 	"devDependencies": {
 		"@fontsource/noto-sans-tc": "^5.0.18",
+		"@iconify-icons/mdi": "^1.2.48",
+		"@iconify/svelte": "^3.1.6",
 		"@sveltejs/adapter-node": "^5.0.1",
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
