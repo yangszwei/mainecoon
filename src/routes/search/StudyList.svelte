@@ -1,6 +1,13 @@
 <script lang="ts">
 	import type { DicomStudy } from '$lib/dicom-web/studies';
 
+	let wrapper: HTMLDivElement;
+
+	export const scrollTo = (studyUid: string) => {
+		const item = wrapper.querySelector(`[data-study-uid="${studyUid}"]`) as HTMLLIElement;
+		if (item) wrapper.scrollTo({ top: item.offsetTop - wrapper.offsetTop, behavior: 'smooth' });
+	};
+
 	export let studies: DicomStudy[] = [];
 
 	export let value: DicomStudy | null = null;
@@ -12,11 +19,15 @@
 	@component
 	A list of studies to select from.
 -->
-<div class="h-full shrink-0 overflow-auto border-r">
+<div bind:this={wrapper} class="h-full shrink-0 overflow-auto border-r">
 	{#if studies && studies.length > 0}
 		<ul class="w-96 {$$props.class ?? ''}">
 			{#each studies as study (study.studyUid)}
-				<li class="overflow-hidden border hover:bg-zinc-100" class:active={study.studyUid === value?.studyUid}>
+				<li
+					class="overflow-hidden border hover:bg-zinc-100"
+					class:active={study.studyUid === value?.studyUid}
+					data-study-uid={study.studyUid}
+				>
 					<div
 						role="none"
 						class="flex w-full flex-col items-start break-all p-3 text-left"
