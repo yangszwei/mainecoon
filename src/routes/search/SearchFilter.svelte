@@ -19,7 +19,13 @@
 -->
 <form bind:this={form} method="get" class="ml-32" on:submit={() => expand(false)}>
 	<Collapse class="flex items-center gap-6 px-3 py-2" bind:expand>
-		<TextInput label="Patient ID" name="patientId" value={filter.patientId} on:enter={search} />
+		<TextInput
+			label="Patient ID"
+			name="patientId"
+			value={filter.patientId}
+			on:click={() => expand(true)}
+			on:enter={search}
+		/>
 		<button type="submit" tabindex="-1" class="btn-outline h-10" on:click={() => expand(false)}>Search</button>
 
 		<div slot="menu" class="-mt-2 space-y-3 rounded-xl bg-green-500 p-3">
