@@ -1,4 +1,4 @@
-import { getImagingInfo, getSeriesInfo } from '$lib/dicom-web/series';
+import { getAnnotations, getImagingInfo, getSeriesInfo } from '$lib/dicom-web/series';
 
 import type { PageServerLoad } from './$types';
 
@@ -8,7 +8,8 @@ export const load: PageServerLoad = async ({ params }) => {
 
 	return {
 		studyUid: params.studyUid,
-		seriesUid: params.seriesUid,
+		seriesUid: smSeriesUid as string,
 		images: await getImagingInfo(params.studyUid, smSeriesUid!),
+		...(series?.modality === 'ANN' ? { annotations: await getAnnotations(params.studyUid, params.seriesUid) } : {}),
 	};
 };
