@@ -79,7 +79,12 @@ export const getImagingInfo = async (studyUid: string, seriesUid: string): Promi
 		}
 	});
 
-	return instances.filter(Boolean).toSorted(sortImagingInfo) as ImagingInfo[];
+	return instances.filter(isValidSmImage).toSorted(sortImagingInfo) as ImagingInfo[];
+};
+
+const isValidSmImage = (image: ImagingInfo | undefined) => {
+	if (!image) return false;
+	return !image.imageType.includes('LABEL') && !image.imageType.includes('OVERVIEW');
 };
 
 export interface AnnotationInfo {
