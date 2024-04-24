@@ -35,13 +35,23 @@ export enum DicomTags {
 	GraphicType = '00700023',
 }
 
-export const DICOMWEB_URL = env.PUBLIC_DICOMWEB_URL;
+export const DICOMWEB_URLS = (() => {
+	const urls = env.PUBLIC_DICOMWEB_URLS?.split(',');
+	if (!urls || urls.length === 0) {
+		throw new Error('No DICOMweb URLs are defined in the environment variables.');
+	}
+
+	return urls.map((serverStr) => {
+		const [name, url] = serverStr.split('=');
+		return { name, url: url || name };
+	});
+})();
 
 export const toDicomWebUrl = (input: string | object) => {
 	if (typeof input === 'object') {
-		const { studyUid, seriesUid, instanceUid, frame, pathname, searchParams } = input as never;
-		input = '';
-		if (studyUid) input = `/studies/${studyUid}`;
+		const { baseUrl, studyUid, seriesUid, instanceUid, frame, pathname, searchParams } = input as never;
+		input = baseUrl as string;
+		if (studyUid) input += `/studies/${studyUid}`;
 		if (seriesUid) input += `/series/${seriesUid}`;
 		if (instanceUid) input += `/instances/${instanceUid}`;
 		if (frame) input += `/frames/${frame}`;
@@ -49,7 +59,7 @@ export const toDicomWebUrl = (input: string | object) => {
 		if (searchParams) input += `?${(searchParams as URLSearchParams).toString()}`;
 	}
 
-	return DICOMWEB_URL + input;
+	return input;
 };
 
 /**

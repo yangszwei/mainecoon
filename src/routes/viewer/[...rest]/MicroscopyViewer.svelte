@@ -8,6 +8,8 @@
 
 	import type { AnnotationInfo, ImagingInfo } from '$lib/dicom-web/series';
 
+	export let baseUrl: string;
+
 	export let studyUid: string;
 
 	export let seriesUid: string;
@@ -17,7 +19,7 @@
 	export let annotations: AnnotationInfo[] | undefined;
 
 	onMount(async () => {
-		const { extent, layer, view } = computePyramidInfo(studyUid, seriesUid, images);
+		const { extent, layer, view } = computePyramidInfo(baseUrl, studyUid, seriesUid, images);
 		const features = await computeAnnotationFeatures(annotations);
 
 		const map = new Map({

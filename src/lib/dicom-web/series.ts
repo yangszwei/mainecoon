@@ -6,8 +6,8 @@ export interface SeriesInfo {
 	referencedSeriesUid?: string;
 }
 
-export const getSeriesInfo = async (studyUid: string, seriesUid: string) => {
-	const dicomJson = await fetchDicomJson({ studyUid, seriesUid, pathname: '/metadata' });
+export const getSeriesInfo = async (baseUrl: string, studyUid: string, seriesUid: string) => {
+	const dicomJson = await fetchDicomJson({ baseUrl, studyUid, seriesUid, pathname: '/metadata' });
 	if (!dicomJson || dicomJson.length === 0) {
 		return null;
 	}
@@ -32,8 +32,8 @@ export const getSeriesInfo = async (studyUid: string, seriesUid: string) => {
 	return null;
 };
 
-const fetchInstanceMetadata = async (studyUid: string, seriesUid: string, instanceUid: string) => {
-	const dicomJson = await fetchDicomJson({ studyUid, seriesUid, instanceUid, pathname: '/metadata' });
+const fetchInstanceMetadata = async (baseUrl: string, studyUid: string, seriesUid: string, instanceUid: string) => {
+	const dicomJson = await fetchDicomJson({ baseUrl, studyUid, seriesUid, instanceUid, pathname: '/metadata' });
 	return dicomJson[0];
 };
 
@@ -56,10 +56,10 @@ export const sortImagingInfo = (a: ImagingInfo | undefined, b: ImagingInfo | und
 	return aSize === bSize ? a.numberOfFrames - b.numberOfFrames : aSize - bSize;
 };
 
-export const getImagingInfo = async (studyUid: string, seriesUid: string): Promise<ImagingInfo[]> => {
-	const dicomJson = await fetchDicomJson({ studyUid, seriesUid, pathname: '/instances' });
+export const getImagingInfo = async (baseUrl: string, studyUid: string, seriesUid: string): Promise<ImagingInfo[]> => {
+	const dicomJson = await fetchDicomJson({ baseUrl, studyUid, seriesUid, pathname: '/instances' });
 	const instanceUids = dicomJson.map((instance) => instance[DicomTags.SOPInstanceUID]?.Value?.[0] as string);
-	const metadata = await Promise.all(instanceUids.map(fetchInstanceMetadata.bind(null, studyUid, seriesUid)));
+	const metadata = await Promise.all(instanceUids.map(fetchInstanceMetadata.bind(null, baseUrl, studyUid, seriesUid)));
 
 	const instances = metadata.map((metadata) => {
 		const modality = metadata[DicomTags.Modality]?.Value?.[0] as string;
@@ -102,10 +102,10 @@ export interface AnnotationInfo {
 	};
 }
 
-export const getAnnotations = async (studyUid: string, seriesUid: string) => {
-	const dicomJson = await fetchDicomJson({ studyUid, seriesUid, pathname: '/instances' });
+export const getAnnotations = async (baseUrl: string, studyUid: string, seriesUid: string) => {
+	const dicomJson = await fetchDicomJson({ baseUrl, studyUid, seriesUid, pathname: '/instances' });
 	const instanceUids = dicomJson.map((instance) => instance[DicomTags.SOPInstanceUID]?.Value?.[0] as string);
-	const metadata = await Promise.all(instanceUids.map(fetchInstanceMetadata.bind(null, studyUid, seriesUid)));
+	const metadata = await Promise.all(instanceUids.map(fetchInstanceMetadata.bind(null, baseUrl, studyUid, seriesUid)));
 	const instances = metadata.flatMap((metadata) => {
 		const modality = metadata[DicomTags.Modality]?.Value?.[0] as string;
 		const annotations = metadata[DicomTags.AnnotationGroupSequence]?.Value as DicomJson[];

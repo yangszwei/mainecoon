@@ -12,7 +12,12 @@
 
 	export let value: DicomStudy | null = null;
 
-	$: if (!value) value = studies?.[0];
+	const resetValue = () => {
+		value = studies?.[0];
+	};
+
+	$: if (studies) resetValue();
+	$: if (!value) resetValue();
 </script>
 
 <!--

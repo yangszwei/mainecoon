@@ -1,5 +1,7 @@
 <script lang="ts">
 	import Collapse from '$lib/components/Collapse.svelte';
+	import { DICOMWEB_SERVER } from '$lib/dicom-web/server';
+	import { DICOMWEB_URLS } from '$lib/dicom-web';
 	import TextInput from '$lib/components/TextInput.svelte';
 
 	export let filter: Record<string, string>;
@@ -7,7 +9,7 @@
 	let form: HTMLFormElement;
 	let expand: (expand: boolean) => void;
 
-	const search = () => {
+	export const search = () => {
 		form.requestSubmit();
 		expand(false);
 	};
@@ -19,6 +21,10 @@
 -->
 <form bind:this={form} method="get" class="ml-32" on:submit={() => expand(false)}>
 	<Collapse class="flex items-center gap-6 px-3 py-2" bind:expand>
+		{#if $DICOMWEB_SERVER && DICOMWEB_URLS.length > 1}
+			<input type="hidden" name="server" value={$DICOMWEB_SERVER} />
+		{/if}
+
 		<TextInput
 			label="Patient ID"
 			name="patientId"

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { DICOMWEB_SERVER, DICOMWEB_URL } from '$lib/dicom-web/server';
 	import Card from '$lib/components/Card.svelte';
 	import Icon from '@iconify/svelte';
 	import { getStudyInfo } from '$lib/dicom-web/studies';
@@ -15,7 +16,11 @@
 	const openSeries = async (series: StudyInfo | undefined) => {
 		if (series) {
 			loadingStates[series.seriesUid] = true;
-			await goto(`/viewer/${series.studyUid}/${series.seriesUid}`);
+			if ($DICOMWEB_SERVER) {
+				await goto(`/viewer/${$DICOMWEB_SERVER}/${series.studyUid}/${series.seriesUid}`);
+			} else {
+				await goto(`/viewer/${series.studyUid}/${series.seriesUid}`);
+			}
 			loadingStates[series.seriesUid] = false;
 		}
 	};
@@ -28,7 +33,7 @@
 <div class="h-full w-full overflow-auto">
 	<h1 class="page-title m-6"><Icon icon={mdiImageMultiple} class="h-8 w-8" /> Images</h1>
 	{#if data}
-		{#await getStudyInfo(data.studyUid)}
+		{#await getStudyInfo($DICOMWEB_URL, data.studyUid)}
 			<div>
 				<p class="text-center">Loading...</p>
 			</div>

@@ -1,4 +1,3 @@
-import type { ImagingInfo } from '$lib/dicom-web/series';
 import { Projection } from 'ol/proj';
 import { TileGrid } from 'ol/tilegrid';
 import TileLayer from 'ol/layer/Tile';
@@ -7,7 +6,9 @@ import { XYZ } from 'ol/source';
 import { getCenter } from 'ol/extent';
 import { toDicomWebUrl } from '$lib/dicom-web';
 
-export const computePyramidInfo = (studyUid: string, seriesUid: string, images: ImagingInfo[]) => {
+import type { ImagingInfo } from '$lib/dicom-web/series';
+
+export const computePyramidInfo = (baseUrl: string, studyUid: string, seriesUid: string, images: ImagingInfo[]) => {
 	const pyramidTileSizes = [];
 	const pyramidGridSizes = [];
 	const pyramidResolutions = [];
@@ -71,6 +72,7 @@ export const computePyramidInfo = (studyUid: string, seriesUid: string, images: 
 				const { instanceUID, totalPixelMatrixColumns, columns } = images[z]!;
 				const frame = x + y * Math.ceil(totalPixelMatrixColumns / columns) + 1;
 				return toDicomWebUrl({
+					baseUrl: baseUrl,
 					studyUid: studyUid,
 					seriesUid: seriesUid,
 					instanceUid: instanceUID,

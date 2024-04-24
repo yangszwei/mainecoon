@@ -10,6 +10,7 @@
 <div class="flex h-full w-full flex-col">
 	<Header />
 	<MicroscopyViewer
+		baseUrl={data.baseUrl}
 		studyUid={data.studyUid}
 		seriesUid={data.seriesUid}
 		images={data.images}

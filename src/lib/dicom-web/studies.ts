@@ -1,4 +1,4 @@
-import { DICOMWEB_URL, DicomTags, fetchDicomJson } from '$lib/dicom-web';
+import { DicomTags, fetchDicomJson } from '$lib/dicom-web';
 
 import type { DicomJson } from '$lib/dicom-web';
 
@@ -21,7 +21,11 @@ export interface DicomStudy {
 	studyUid: string;
 }
 
-export const getStudiesByFilter = async (filter: StudyFilter, fetcher = fetch): Promise<DicomStudy[]> => {
+export const getStudiesByFilter = async (
+	baseUrl: string,
+	filter: StudyFilter,
+	fetcher = fetch,
+): Promise<DicomStudy[]> => {
 	const searchParams = new URLSearchParams({ [DicomTags.ModalitiesInStudy]: 'SM' });
 	if (filter.patientId) searchParams.set(DicomTags.PatientID, filter.patientId);
 	if (filter.patientName) searchParams.set(DicomTags.PatientName, filter.patientName);
@@ -29,7 +33,7 @@ export const getStudiesByFilter = async (filter: StudyFilter, fetcher = fetch): 
 	if (filter.accessionNumber) searchParams.set(DicomTags.AccessionNumber, filter.accessionNumber);
 	if (filter.studyDate) searchParams.set(DicomTags.StudyDate, filter.studyDate);
 
-	const dicomJson = await fetchDicomJson({ pathname: '/studies', searchParams }, fetcher);
+	const dicomJson = await fetchDicomJson({ baseUrl, pathname: '/studies', searchParams }, fetcher);
 
 	return dicomJson.map((study) => ({
 		studyDate: (study[DicomTags.StudyDate]?.Value?.[0] as string) ?? '',
@@ -54,23 +58,23 @@ export interface StudyInfo {
 	studyUid: string;
 }
 
-const fetchSeriesMetadata = async (studyUid: string, seriesUid: string) => {
-	const dicomJson = await fetchDicomJson({ studyUid, seriesUid, pathname: '/metadata' });
+const fetchSeriesMetadata = async (baseUrl: string, studyUid: string, seriesUid: string) => {
+	const dicomJson = await fetchDicomJson({ baseUrl, studyUid, seriesUid, pathname: '/metadata' });
 	return dicomJson[0];
 };
 
 const toGraphicType = (ann: DicomJson) => ann[DicomTags.GraphicType]?.Value as string[];
 
-const getSeriesInstanceCount = async (studyUid: string, seriesUid: string, fetcher = fetch) => {
+const getSeriesInstanceCount = async (baseUrl: string, studyUid: string, seriesUid: string, fetcher = fetch) => {
 	if (!studyUid || !seriesUid) return null;
-	const dicomJson = await fetchDicomJson({ studyUid, seriesUid, pathname: '/instances' }, fetcher);
+	const dicomJson = await fetchDicomJson({ baseUrl, studyUid, seriesUid, pathname: '/instances' }, fetcher);
 	return dicomJson.length;
 };
 
-export const getStudyInfo = async (studyUid: string, fetcher = fetch) => {
-	const dicomJson = await fetchDicomJson({ studyUid, pathname: '/series' }, fetcher);
+export const getStudyInfo = async (baseUrl: string, studyUid: string, fetcher = fetch) => {
+	const dicomJson = await fetchDicomJson({ baseUrl, studyUid, pathname: '/series' }, fetcher);
 	const seriesUids = dicomJson.map((series) => series[DicomTags.SeriesInstanceUID]?.Value?.[0] as string);
-	const metadata = await Promise.all(seriesUids.map(fetchSeriesMetadata.bind(null, studyUid)));
+	const metadata = await Promise.all(seriesUids.map(fetchSeriesMetadata.bind(null, baseUrl, studyUid)));
 
 	const series: (StudyInfo | undefined)[] = metadata.map((metadata) => {
 		const modality = metadata[DicomTags.Modality]?.Value?.[0] as string;
@@ -99,8 +103,8 @@ export const getStudyInfo = async (studyUid: string, fetcher = fetch) => {
 		.sort((a, b) => (a?.numberOfFrames ?? 0) - (b?.numberOfFrames ?? 0))[0];
 
 	if (sm) {
-		sm.thumbnail = sm.seriesUid ? `${DICOMWEB_URL}/studies/${studyUid}/series/${sm.seriesUid}/thumbnail` : undefined;
-		sm.instances = (await getSeriesInstanceCount(studyUid, sm.seriesUid as string)) ?? undefined;
+		sm.thumbnail = sm.seriesUid ? `${baseUrl}/studies/${studyUid}/series/${sm.seriesUid}/thumbnail` : undefined;
+		sm.instances = (await getSeriesInstanceCount(baseUrl, studyUid, sm.seriesUid as string)) ?? undefined;
 	}
 
 	return {
