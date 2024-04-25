@@ -1,0 +1,11 @@
+.DS_Store
+node_modules
+/.githooks
+/build
+/data
+/.svelte-kit
+docker-compose.yml
+Dockerfile
+.env
+.env.*
+!.env.example
