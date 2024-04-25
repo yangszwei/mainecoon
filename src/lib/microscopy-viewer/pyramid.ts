@@ -26,7 +26,7 @@ export const computePyramidInfo = (baseUrl: string, studyUid: string, seriesUid:
 		const rows = image.rows;
 		const totalPixelMatrixColumns = image.totalPixelMatrixColumns;
 		const totalPixelMatrixRows = image.totalPixelMatrixRows;
-		const pixelSpacing = [1, 1]; // Replace with actual pixel spacing if available
+		const pixelSpacing = image.pixelSpacing || [1, 1]; // Replace with actual pixel spacing if available
 
 		const nColumns = Math.ceil(totalPixelMatrixColumns / columns);
 		const nRows = Math.ceil(totalPixelMatrixRows / rows);

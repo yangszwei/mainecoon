@@ -44,7 +44,7 @@ export interface ImagingInfo {
 	numberOfFrames: number;
 	rows: number;
 	columns: number;
-	pixelSpacing: string[];
+	pixelSpacing: number[];
 	totalPixelMatrixColumns: number;
 	totalPixelMatrixRows: number;
 }
@@ -72,7 +72,7 @@ export const getImagingInfo = async (baseUrl: string, studyUid: string, seriesUi
 				numberOfFrames: metadata[DicomTags.NumberOfFrames]?.Value?.[0] as number,
 				rows: metadata[DicomTags.Rows]?.Value?.[0] as number,
 				columns: metadata[DicomTags.Columns]?.Value?.[0] as number,
-				pixelSpacing: metadata[DicomTags.PixelSpacing]?.Value as string[],
+				pixelSpacing: metadata[DicomTags.PixelSpacing]?.Value as number[],
 				totalPixelMatrixColumns: metadata[DicomTags.TotalPixelMatrixColumns]?.Value?.[0] as number,
 				totalPixelMatrixRows: metadata[DicomTags.TotalPixelMatrixRows]?.Value?.[0] as number,
 			};
