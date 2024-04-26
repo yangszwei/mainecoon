@@ -100,9 +100,8 @@ export const computeAnnotationFeatures = async (
 		}
 
 		const referencedResolution = resolutions.find((res) => res.instanceUID === instanceUID)?.resolution;
-		const zoomFactor = resolutions[0].resolution / referencedResolution!;
 
-		points = points?.map((point) => point * zoomFactor);
+		points = points?.map((point) => point * referencedResolution!);
 
 		if (indexesData) {
 			if (indexesData.inlineBinary) {
