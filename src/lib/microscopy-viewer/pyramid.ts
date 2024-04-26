@@ -55,6 +55,11 @@ export const computePyramidInfo = (baseUrl: string, studyUid: string, seriesUid:
 	pyramidImageSizes.reverse();
 	pyramidPhysicalSizes.reverse();
 
+	const resolutions = images.map((image) => ({
+		instanceUID: image.instanceUID,
+		resolution: Math.round(baseTotalPixelMatrixColumns / image.totalPixelMatrixColumns),
+	}));
+
 	const extent = [0, -(baseTotalPixelMatrixRows + 1), baseTotalPixelMatrixColumns, -1];
 	const projection = new Projection({ code: 'DICOM', units: 'm', global: true, extent: extent });
 
@@ -102,5 +107,5 @@ export const computePyramidInfo = (baseUrl: string, studyUid: string, seriesUid:
 		zoom: 2,
 	});
 
-	return { extent, layer, view };
+	return { extent, layer, view, resolutions };
 };

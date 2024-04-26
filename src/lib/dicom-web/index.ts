@@ -16,6 +16,8 @@ export enum DicomTags {
 	Modality = '00080060',
 	ModalitiesInStudy = '00080061',
 	ReferencedSeriesSequence = '00081115',
+	ReferencedInstanceSequence = '0008114A',
+	ReferencedSOPInstanceUID = '00081155',
 	PatientName = '00100010',
 	PatientID = '00100020',
 	PatientBirthDate = '00100030',

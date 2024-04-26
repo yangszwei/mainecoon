@@ -89,6 +89,7 @@ const isValidSmImage = (image: ImagingInfo | undefined) => {
 
 export interface AnnotationInfo {
 	modality: string;
+	instanceUID: string;
 	graphicType: string;
 	pointsData: {
 		vr: string;
@@ -108,6 +109,8 @@ export const getAnnotations = async (baseUrl: string, studyUid: string, seriesUi
 	const metadata = await Promise.all(instanceUids.map(fetchInstanceMetadata.bind(null, baseUrl, studyUid, seriesUid)));
 	const instances = metadata.flatMap((metadata) => {
 		const modality = metadata[DicomTags.Modality]?.Value?.[0] as string;
+		const referencedSeriesSequence = metadata[DicomTags.ReferencedSeriesSequence]?.Value?.[0] as DicomJson;
+		const referencedInstance = referencedSeriesSequence[DicomTags.ReferencedInstanceSequence]?.Value?.[0] as DicomJson;
 		const annotations = metadata[DicomTags.AnnotationGroupSequence]?.Value as DicomJson[];
 
 		return annotations.map((annotation) => {
@@ -121,6 +124,7 @@ export const getAnnotations = async (baseUrl: string, studyUid: string, seriesUi
 			if (modality === 'ANN') {
 				return {
 					modality,
+					instanceUID: referencedInstance[DicomTags.ReferencedSOPInstanceUID]?.Value?.[0] as string,
 					pointsData: {
 						vr: coordinates.vr,
 						...(coordinates.BulkDataURI

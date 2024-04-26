@@ -19,8 +19,8 @@
 	export let annotations: AnnotationInfo[] | undefined;
 
 	onMount(async () => {
-		const { extent, layer, view } = computePyramidInfo(baseUrl, studyUid, seriesUid, images);
-		const features = await computeAnnotationFeatures(annotations);
+		const { extent, layer, resolutions, view } = computePyramidInfo(baseUrl, studyUid, seriesUid, images);
+		const features = await computeAnnotationFeatures(annotations, resolutions);
 
 		const map = new Map({
 			controls: [],

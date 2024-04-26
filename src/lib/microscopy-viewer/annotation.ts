@@ -73,14 +73,22 @@ const calculateEllipsePoints = (points: number[][]) => {
 	return pointsOnEllipse;
 };
 
-export const computeAnnotationFeatures = async (annotations: AnnotationInfo[] | undefined) => {
+interface InstanceResolution {
+	instanceUID: string;
+	resolution: number;
+}
+
+export const computeAnnotationFeatures = async (
+	annotations: AnnotationInfo[] | undefined,
+	resolutions: InstanceResolution[],
+) => {
 	const features: Feature<Geometry>[] = [];
 
 	if (!annotations) {
 		return [];
 	}
 
-	for (const { pointsData, indexesData, graphicType } of annotations ?? []) {
+	for (const { instanceUID, pointsData, indexesData, graphicType } of annotations ?? []) {
 		let points: Float64Array | Float32Array | undefined;
 		let indexes: Uint32Array | undefined;
 
@@ -90,6 +98,11 @@ export const computeAnnotationFeatures = async (annotations: AnnotationInfo[] | 
 			const response = await fetch(pointsData.uri);
 			points = decodeCoordinatesData(multipartDecode(await response.arrayBuffer()), pointsData.vr);
 		}
+
+		const referencedResolution = resolutions.find((res) => res.instanceUID === instanceUID)?.resolution;
+		const zoomFactor = resolutions[0].resolution / referencedResolution!;
+
+		points = points?.map((point) => point * zoomFactor);
 
 		if (indexesData) {
 			if (indexesData.inlineBinary) {
