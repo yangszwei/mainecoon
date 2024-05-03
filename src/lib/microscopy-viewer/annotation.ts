@@ -112,6 +112,9 @@ export const computeAnnotationFeatures = async (
 			}
 		}
 
+		// Decrement indexes by 1 to match the 0-based index
+		indexes = indexes?.map((index) => index - 1);
+
 		if (!points || points.length === 0) {
 			continue;
 		}
@@ -134,7 +137,7 @@ export const computeAnnotationFeatures = async (
 				break;
 			case 'POLYLINE':
 				for (let i = 0; i < indexes!.length; i++) {
-					const coord = coordinates.slice(indexes![i], indexes![i + 1] ?? coordinates.length);
+					const coord = coordinates.slice(indexes![i], indexes![i + 1] || coordinates.length);
 					if (coord && coord.length > 1) {
 						features.push(new Feature({ geometry: new LineString(coord) }));
 					}
