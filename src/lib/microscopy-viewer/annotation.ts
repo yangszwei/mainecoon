@@ -99,9 +99,14 @@ export const computeAnnotationFeatures = async (
 			points = decodeCoordinatesData(multipartDecode(await response.arrayBuffer()), pointsData.vr);
 		}
 
-		const referencedResolution = resolutions.find((res) => res.instanceUID === instanceUID)?.resolution;
+		let referencedResolution = resolutions.find((res) => res.instanceUID === instanceUID)?.resolution;
+		if (!referencedResolution) {
+			referencedResolution = resolutions[resolutions.length - 1].resolution;
+			// eslint-disable-next-line no-console
+			console.warn(`The referenced instance "${instanceUID}" count not be found, using the highest resolution.`);
+		}
 
-		points = points?.map((point) => point * referencedResolution!);
+		points = points?.map((point) => point * referencedResolution);
 
 		if (indexesData) {
 			if (indexesData.inlineBinary) {
