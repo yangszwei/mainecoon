@@ -103,7 +103,7 @@ export const computeAnnotationFeatures = async (
 		if (!referencedResolution) {
 			referencedResolution = resolutions[resolutions.length - 1].resolution;
 			// eslint-disable-next-line no-console
-			console.warn(`The referenced instance "${instanceUID}" count not be found, using the highest resolution.`);
+			console.warn(`The referenced instance "${instanceUID}" could not be found, using the highest resolution.`);
 		}
 
 		points = points?.map((point) => point * referencedResolution);
