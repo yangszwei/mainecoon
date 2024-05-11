@@ -78,13 +78,10 @@ interface InstanceResolution {
 	resolution: number;
 }
 
-export const computeAnnotationFeatures = async (
-	annotations: AnnotationInfo[] | undefined,
-	resolutions: InstanceResolution[],
-) => {
+export const computeAnnotationFeatures = async (annotations: AnnotationInfo[], resolutions: InstanceResolution[]) => {
 	const features: Feature<Geometry>[] = [];
 
-	if (!annotations) {
+	if (annotations.length === 0) {
 		return [];
 	}
 

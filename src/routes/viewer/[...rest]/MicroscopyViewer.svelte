@@ -20,10 +20,13 @@
 
 	export let images: ImagingInfo[];
 
-	export let annotations: AnnotationInfo[] | undefined;
+	export let annotations: AnnotationInfo[];
 
-	let loading = true;
+	let loading = false;
 	let errorMessage: string | undefined;
+
+	// Show loading indicator if there are annotations to load
+	$: loading = annotations.length > 0;
 
 	onMount(() => {
 		if (images.length === 0) {
@@ -74,10 +77,13 @@
 	});
 </script>
 
-<div class="relative h-full w-full {$$props.class ?? ''}">
+<div class="relative h-full w-full overflow-hidden {$$props.class ?? ''}">
 	<div id="map" class="h-full w-full" />
-	<div class="absolute inset-0 z-10 flex items-center justify-center bg-black/40" class:hidden={!loading}>
-		<span class="loader border-green-500" />
+	<div class="absolute left-1/2 -translate-x-1/2 transition-all duration-300 {loading ? 'bottom-2' : '-bottom-8'}">
+		<div class="flex items-center gap-3 rounded-full border bg-white/75 px-2 py-1 text-xs shadow">
+			<span class="loader h-4 w-4 border-2 border-green-500" />
+			<p>Loading Annotations...</p>
+		</div>
 	</div>
 	<div class="absolute inset-0 z-10 flex items-center justify-center bg-black/40" class:hidden={!errorMessage}>
 		<p>{errorMessage}</p>

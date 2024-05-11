@@ -18,6 +18,6 @@ export const load: PageServerLoad = async ({ params }) => {
 		studyUid: studyUid,
 		seriesUid: smSeriesUid as string,
 		images: await getImagingInfo(baseUrl, studyUid, smSeriesUid!),
-		...(series?.modality === 'ANN' ? { annotations: await getAnnotations(baseUrl, studyUid, seriesUid) } : {}),
+		annotations: series?.modality === 'ANN' ? await getAnnotations(baseUrl, studyUid, seriesUid) : [],
 	};
 };
