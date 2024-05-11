@@ -6,8 +6,8 @@
 	import TileLayer from 'ol/layer/Tile';
 	import VectorLayer from 'ol/layer/Vector';
 	import VectorSource from 'ol/source/Vector';
-	import { computeAnnotationFeatures } from '$lib/microscopy-viewer/annotation';
-	import { computePyramidInfo } from '$lib/microscopy-viewer/pyramid';
+	import { computeAnnotationFeatures } from './annotation';
+	import { computePyramidInfo } from './pyramid';
 	import { onMount } from 'svelte';
 
 	import type { AnnotationInfo, ImagingInfo } from '$lib/dicom-web/series';

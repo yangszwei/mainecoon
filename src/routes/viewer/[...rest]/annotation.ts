@@ -122,9 +122,17 @@ export const computeAnnotationFeatures = async (annotations: AnnotationInfo[], r
 		}
 
 		const coordinates = [];
+		let hasNegativeCoordinates = false;
 
 		for (let i = 0; i < points.length; i += 2) {
+			const [x, y] = [points[i], points[i + 1]];
+			if (x < 0 || y < 0) hasNegativeCoordinates = true;
 			coordinates.push([points[i], -points[i + 1]]);
+		}
+
+		if (hasNegativeCoordinates) {
+			// eslint-disable-next-line no-console
+			console.warn('Detected negative coordinates, some annotations may be out of bounds.');
 		}
 
 		if ((graphicType === 'POLYLINE' || graphicType === 'POLYGON') && !indexes) {

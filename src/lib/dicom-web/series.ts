@@ -113,7 +113,7 @@ export const getAnnotations = async (baseUrl: string, studyUid: string, seriesUi
 		const referencedInstance = referencedSeriesSequence[DicomTags.ReferencedInstanceSequence]?.Value?.[0] as DicomJson;
 		const annotations = metadata[DicomTags.AnnotationGroupSequence]?.Value as DicomJson[];
 
-		return annotations.map((annotation) => {
+		return annotations?.map((annotation) => {
 			let coordinates = annotation[DicomTags.PointCoordinatesData];
 			coordinates ??= annotation[DicomTags.DoublePointCoordinatesData];
 
