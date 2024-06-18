@@ -18,6 +18,8 @@
 	},
 	"devDependencies": {
 		"@fontsource/noto-sans-tc": "^5.0.19",
+		"@iconify-icons/mdi": "^1.2.48",
+		"@iconify/react": "^5.0.1",
 		"@tailwindcss/forms": "^0.5.7",
 		"@types/node": "^20",
 		"@types/react": "^18",

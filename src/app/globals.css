@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+	.spinner {
+		@apply box-border inline-block h-12 w-12 animate-spin rounded-full border-4 border-b-transparent;
+	}
+}
