@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Button from '@/app/_components/Button';
 import type { DicomJson } from '@/lib/dicom-web';
+import type { DicomServer } from '@/config/dicom-web';
 import type { FormEvent } from 'react';
 import TextInput from './TextInput';
 import { getStudies } from './actions';
@@ -17,7 +18,7 @@ function isFormDataEqual(a: FormData, b: FormData) {
 
 export interface SearchFormProps {
 	/** The current DICOMweb server. */
-	server: { name: string; url: string };
+	server: DicomServer;
 	/** Sets the studies to display. */
 	setStudies: (studies: DicomJson[]) => void;
 	/** The loading state of the search form. */

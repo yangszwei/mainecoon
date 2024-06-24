@@ -18,8 +18,8 @@ export function DrawerSection({ title, open, fixed, children }: Readonly<DrawerS
 
 	return (
 		<div>
-			<div className="border-y bg-green-200" onClick={() => setIsOpen(!isOpen)}>
-				<button className="flex w-full select-none items-center justify-between px-3 py-2 text-sm font-bold">
+			<div className="bg-green-200" onClick={() => setIsOpen(!isOpen)}>
+				<button className="flex w-full select-none items-center justify-between px-3 py-2 text-sm">
 					<span>{title}</span>
 					{fixed || (
 						<Icon
@@ -46,7 +46,9 @@ export default function Drawer({ className, placement, children }: Readonly<Draw
 	const placementClass = placement === 'right' ? 'border-l' : 'border-r';
 
 	return (
-		<aside className={`relative h-full w-72 shrink-0 bg-white shadow-sm ${placementClass} ${className || ''}`}>
+		<aside
+			className={`relative h-full w-72 shrink-0 overflow-auto bg-white shadow-sm ${placementClass} ${className || ''}`}
+		>
 			{children}
 		</aside>
 	);

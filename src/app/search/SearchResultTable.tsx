@@ -2,12 +2,13 @@
 
 import { $dicom, DicomJson, DicomTag, fetchDicomJson, toDicomWebUri } from '@/lib/dicom-web';
 import { useEffect, useState } from 'react';
+import type { DicomServer } from '@/config/dicom-web';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 interface ThumbnailsProps {
 	/** The current DICOMweb server. */
-	server: { name: string; url: string };
+	server: DicomServer;
 	/** The study UID to render thumbnails for. */
 	studyUid: string;
 }
@@ -52,7 +53,7 @@ function Thumbnails({ server, studyUid }: Readonly<ThumbnailsProps>) {
 
 export interface SearchResultTableProps {
 	/** The current DICOMweb server. */
-	server: { name: string; url: string };
+	server: DicomServer;
 	/** The studies to display. */
 	studies: DicomJson[];
 	/** The loading state of the search results. */

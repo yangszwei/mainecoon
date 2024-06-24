@@ -1,9 +1,9 @@
-/** The type definition for the available DICOMweb servers map. */
-export type DicomServerConfig = { [key: string]: { name: string; url: string } };
+/** The config for a single DICOMweb server. */
+export type DicomServer = { name: string; url: string };
 
 /** The available DICOMweb servers, keyed by display name. */
-export const servers: DicomServerConfig = (() => {
-	const servers: DicomServerConfig = {};
+export const servers: { [name: string]: DicomServer } = (() => {
+	const servers: { [name: string]: DicomServer } = {};
 
 	const serversString = process.env.NEXT_PUBLIC_DICOMWEB_SERVERS || '';
 	for (const serverString of serversString.split(',')) {

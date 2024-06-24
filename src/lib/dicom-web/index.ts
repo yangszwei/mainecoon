@@ -1,4 +1,5 @@
 import { DicomTag } from './tag';
+import { formatValue } from './vr';
 
 /** A DICOM JSON model object. */
 export type DicomJson = Record<DicomTag, DicomAttribute>;
@@ -75,7 +76,11 @@ export const fetchDicomJson = async (options: FetchOptions): Promise<DicomJson[]
 };
 
 /** This is a helper function used to display DICOM values on the UI. */
-export const $dicom = (dicomJson: DicomJson, ...tags: DicomTag[]): string => {
+export const $dicom = (dicomJson: DicomJson | null, ...tags: DicomTag[]): string => {
+	if (!dicomJson) {
+		return '';
+	}
+
 	const currentAttribute = dicomJson[tags[0]];
 	if (!currentAttribute) {
 		return '';
@@ -92,13 +97,5 @@ export const $dicom = (dicomJson: DicomJson, ...tags: DicomTag[]): string => {
 	}
 
 	// Return the value formatted based on the VR
-	switch (currentAttribute.vr) {
-		case 'PN':
-			// @ts-ignore
-			return (currentValue as any).Alphabetic;
-		case 'DA':
-			return (currentValue as string).replace(/(\d{4})(\d{2})(\d{2})/, '$1/$2/$3');
-		default:
-			return currentValue as string;
-	}
+	return formatValue(currentAttribute.vr, currentValue);
 };

@@ -6,4 +6,8 @@
 	.spinner {
 		@apply box-border inline-block h-12 w-12 animate-spin rounded-full border-4 border-b-transparent;
 	}
+
+	.spinner-sm {
+		@apply box-border inline-block h-4 w-4 animate-spin rounded-full border-2 border-b-transparent;
+	}
 }
