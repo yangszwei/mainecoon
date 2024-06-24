@@ -10,4 +10,8 @@
 	.spinner-sm {
 		@apply box-border inline-block h-4 w-4 animate-spin rounded-full border-2 border-b-transparent;
 	}
+
+	.ol-scale-line {
+		@apply !left-auto right-2;
+	}
 }

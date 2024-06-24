@@ -4,6 +4,7 @@ import { $dicom, DicomJson, DicomTag, fetchDicomJson, toDicomWebUri } from '@/li
 import { useEffect, useState } from 'react';
 import type { DicomServer } from '@/config/dicom-web';
 import Link from 'next/link';
+import { formatPatientSex } from '@/lib/dicom-web/vr';
 import { useRouter } from 'next/navigation';
 
 interface ThumbnailsProps {
@@ -100,7 +101,7 @@ export default function SearchResultTable({ server, studies, isLoading }: Readon
 									{/* @ts-ignore-next-line */}
 									<td className="border p-3">{$dicom(study, DicomTag.PatientName)}</td>
 									<td className="border p-3">{$dicom(study, DicomTag.PatientBirthDate)}</td>
-									<td className="border p-3">{$dicom(study, DicomTag.PatientSex)}</td>
+									<td className="border p-3">{formatPatientSex($dicom(study, DicomTag.PatientSex))}</td>
 									<td className="border p-3">{$dicom(study, DicomTag.AccessionNumber)}</td>
 									<td className="border p-3">{$dicom(study, DicomTag.StudyDate)}</td>
 									<td className="border p-3">

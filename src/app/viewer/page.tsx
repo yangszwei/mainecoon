@@ -5,36 +5,40 @@ import Drawer, { DrawerSection } from '@/app/_components/Drawer';
 import { useEffect, useState } from 'react';
 import AnnotationList from './AnnotationList';
 import Header from '@/app/_components/Header';
+import Image from 'next/image';
 import PatientDescription from './PatientDescription';
 import SlideList from './SlideList';
 import SlideViewer from './SlideViewer';
 import StudyDescription from './StudyDescription';
+import icon from '@/app/icon.png';
 import { servers } from '@/config/dicom-web';
 import { useAnnotations } from '@/app/viewer/annotation';
+import { useSearchParams } from 'next/navigation';
 import { useStudy } from './study';
 
 /**
  * Builds a valid options object based on the search parameters for the viewer page.
  *
- * @param searchParams The search parameters.
  * @returns The options object, guaranteed to be valid.
  */
-export function useOptions(searchParams: Readonly<SearchParams>) {
+function useOptions() {
+	const searchParams = useSearchParams();
+
 	const [server, setServer] = useState(servers.default);
 	const [studyUid, setStudyUid] = useState<string>('');
 	const [seriesUid, setSeriesUid] = useState<string | null>(null);
 
 	useEffect(() => {
-		if (typeof searchParams.server === 'string') setServer(servers[searchParams.server] || servers.default);
-		if (typeof searchParams.studyUid === 'string') setStudyUid(searchParams.studyUid);
-		if (typeof searchParams.seriesUid === 'string') setSeriesUid(searchParams.seriesUid);
+		if (searchParams.get('server')) setServer(servers[searchParams.get('server')!] || servers.default);
+		if (searchParams.get('studyUid')) setStudyUid(searchParams.get('studyUid')!);
+		if (searchParams.get('seriesUid')) setSeriesUid(searchParams.get('seriesUid')!);
 	}, [searchParams]);
 
 	return { server, studyUid, seriesUid };
 }
 
-export default function ViewerPage({ searchParams }: Readonly<{ searchParams: SearchParams }>) {
-	const { server, studyUid, seriesUid } = useOptions(searchParams);
+export default function ViewerPage() {
+	const { server, studyUid, seriesUid } = useOptions();
 	const [study, slides] = useStudy(server, studyUid);
 	const [currentSlide, setCurrentSlide] = useState<DicomJson | null>(null);
 	const [annotations, updateAnnotation] = useAnnotations(server, currentSlide);
@@ -73,8 +77,12 @@ export default function ViewerPage({ searchParams }: Readonly<{ searchParams: Se
 							annotations={annotations}
 							updateAnnotation={updateAnnotation}
 						/>
-					) : (
+					) : slides.length > 0 ? (
 						<p className="flex h-full items-center justify-center text-gray-500">No slide selected</p>
+					) : (
+						<p className="flex h-full items-center justify-center text-gray-500">
+							<Image src={icon} height={120} width={120} className="animate-spin rounded-full" alt="" />
+						</p>
 					)}
 				</main>
 				<Drawer placement="right">

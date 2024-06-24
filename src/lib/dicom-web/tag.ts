@@ -21,6 +21,7 @@ export enum DicomTag {
 	Rows = '00280010',
 	Columns = '00280011',
 	PixelSpacing = '00280030',
+	PixelMeasuresSequence = '00289110',
 	ContainerIdentifier = '00400512',
 	TotalPixelMatrixColumns = '00480006',
 	TotalPixelMatrixRows = '00480007',
@@ -30,4 +31,5 @@ export enum DicomTag {
 	AnnotationGroupUID = '006A0003',
 	AnnotationGroupLabel = '006A0005',
 	GraphicType = '00700023',
+	SharedFunctionalGroupsSequence = '52009229',
 }

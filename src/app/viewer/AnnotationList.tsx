@@ -6,12 +6,13 @@ import mdiChevronDown from '@iconify-icons/mdi/chevron-down';
 import { useState } from 'react';
 
 interface AnnotationGroupListProps {
+	index: number;
 	series: AnnotationMap['series'][string];
 	configs: AnnotationMap['configs'][string];
 	updateAnnotation: (groupUid: string, update: Partial<AnnotationConfig>) => void;
 }
 
-function AnnotationGroupList({ series, configs, updateAnnotation }: Readonly<AnnotationGroupListProps>) {
+function AnnotationGroupList({ index, series, configs, updateAnnotation }: Readonly<AnnotationGroupListProps>) {
 	const [open, setOpen] = useState(true);
 	const isOpen = !Object.values(configs).every((group) => group.loading) && open;
 
@@ -39,7 +40,7 @@ function AnnotationGroupList({ series, configs, updateAnnotation }: Readonly<Ann
 							}}
 						/>
 					)}
-					<span>Annotation {$dicom(series.dicomJson, DicomTag.SeriesNumber) ?? 'Untitled'}</span>
+					<span>Annotation {index + 1}</span>
 					<Icon
 						icon={mdiChevronDown}
 						className={`ml-auto mr-0 inline-block h-5 w-5 transition-transform ${isOpen ? 'rotate-180' : 'rotate-0'}`}
@@ -90,10 +91,11 @@ export default function AnnotationList({ annotations, updateAnnotation }: Readon
 
 	return (
 		<ul>
-			{Object.entries(annotations.series).map(([seriesUid, series]) => {
+			{Object.entries(annotations.series).map(([seriesUid, series], index) => {
 				return (
 					<AnnotationGroupList
 						key={seriesUid}
+						index={index}
 						series={series}
 						configs={annotations.configs[seriesUid]}
 						updateAnnotation={updateAnnotation.bind(null, seriesUid)}

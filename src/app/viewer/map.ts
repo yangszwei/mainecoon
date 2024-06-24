@@ -1,12 +1,12 @@
 import { DicomTag, fetchDicomJson, toDicomWebUri } from '@/lib/dicom-web';
 import { Map, View } from 'ol';
-import { MousePosition, OverviewMap, defaults as defaultControls } from 'ol/control';
+import { MousePosition, OverviewMap, ScaleLine, defaults as defaultControls } from 'ol/control';
 import { useEffect, useRef, useState } from 'react';
 import type { DicomJson } from '@/lib/dicom-web';
 import type { DicomServer } from '@/config/dicom-web';
 import { Projection } from 'ol/proj';
 import { TileGrid } from 'ol/tilegrid';
-import TileLayer from 'ol/layer/Tile';
+import TileLayer from 'ol/layer/WebGLTile';
 import { XYZ } from 'ol/source';
 import { getCenter } from 'ol/extent';
 
@@ -51,6 +51,24 @@ function fetchImages(server: DicomServer, slide: DicomJson) {
 }
 
 /**
+ * Extracts value of Pixel Spacing attribute from metadata.
+ *
+ * @private
+ * @param {object} metadata - Metadata of a DICOM VL Whole Slide Microscopy Image instance
+ * @returns {number[]} Spacing between pixel columns and rows in millimeter
+ */
+function getPixelSpacing(metadata: DicomJson) {
+	const functionalGroup = metadata[DicomTag.SharedFunctionalGroupsSequence].Value?.[0] as DicomJson | undefined;
+	const pixelMeasures = functionalGroup?.[DicomTag.PixelMeasuresSequence]?.Value?.[0] as DicomJson | undefined;
+	if (!pixelMeasures) return [1, 1];
+
+	return [
+		Number(pixelMeasures[DicomTag.PixelSpacing]?.Value?.[0]) || 1,
+		Number(pixelMeasures[DicomTag.PixelSpacing]?.Value?.[1]) || 1,
+	];
+}
+
+/**
  * Computes the information needed to display the pyramid with the volume images.
  *
  * @param images The volume images.
@@ -80,7 +98,7 @@ function computePyramidInfo(images: DicomJson[]) {
 		const rows = image[DicomTag.Rows].Value?.[0] as number;
 		const totalPixelMatrixColumns = image[DicomTag.TotalPixelMatrixColumns].Value?.[0] as number;
 		const totalPixelMatrixRows = image[DicomTag.TotalPixelMatrixRows].Value?.[0] as number;
-		const pixelSpacing = (image[DicomTag.PixelSpacing]?.Value as [number, number]) || [1, 1];
+		const pixelSpacing = getPixelSpacing(image) || [1, 1];
 
 		const nColumns = Math.ceil(totalPixelMatrixColumns / columns);
 		const nRows = Math.ceil(totalPixelMatrixRows / rows);
@@ -157,8 +175,7 @@ export function useMap(id: string, server: DicomServer, slide: DicomJson | null)
 				global: true,
 				extent: extent,
 				getPointResolution: (resolution: number, point: number[]) => {
-					const pixelSpacing = pyramidInfo.pixelSpacings[pyramidInfo.pixelSpacings.length - 1];
-					return (resolution * Math.max(pixelSpacing[0], pixelSpacing[1])) / 10 ** 3;
+					return (resolution * pyramidInfo.pixelSpacings[pyramidInfo.pixelSpacings.length - 1][0]) / 10 ** 3;
 				},
 			});
 
@@ -210,11 +227,15 @@ export function useMap(id: string, server: DicomServer, slide: DicomJson | null)
 				...defaultControls().getArray(),
 				new MousePosition({
 					coordinateFormat: (c: number[] | undefined) => (c ? `(${c[0].toFixed(2)}, ${-c[1].toFixed(2)})` : ''),
-					className: 'm-1.5 text-center text-sm',
+					className: 'absolute left-auto right-0 m-2 rounded-sm bg-white/75 px-1 py-0.5 text-xs font-medium',
 				}),
 				new OverviewMap({
 					collapsed: false,
 					layers: [new TileLayer({ source: layer.getSource() ?? undefined })],
+				}),
+				new ScaleLine({
+					units: 'metric',
+					className: 'ol-scale-line',
 				}),
 			];
 
