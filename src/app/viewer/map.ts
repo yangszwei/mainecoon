@@ -4,6 +4,7 @@ import { MousePosition, OverviewMap, ScaleLine, defaults as defaultControls } fr
 import { useEffect, useRef, useState } from 'react';
 import type { DicomJson } from '@/lib/dicom-web';
 import type { DicomServer } from '@/config/dicom-web';
+import type { ImageTile } from 'ol';
 import { Projection } from 'ol/proj';
 import { TileGrid } from 'ol/tilegrid';
 import TileLayer from 'ol/layer/WebGLTile';
@@ -193,6 +194,11 @@ export function useMap(id: string, server: DicomServer, slide: DicomJson | null)
 
 			const layer = new TileLayer({
 				source: new XYZ({
+					tileLoadFunction: (tile, src) => {
+						const image = (tile as ImageTile).getImage() as HTMLImageElement;
+						image.src = src;
+						image.fetchPriority = 'high';
+					},
 					tileUrlFunction: ([z, x, y]: number[]) => {
 						const image = images.volumes[z];
 						const instanceUid = image[DicomTag.SOPInstanceUID].Value?.[0] as string;
