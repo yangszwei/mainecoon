@@ -2,7 +2,7 @@ import { DicomTag } from './tag';
 import { formatValue } from './vr';
 
 /** A DICOM JSON model object. */
-export type DicomJson = Record<DicomTag, DicomAttribute>;
+export type DicomJson = Partial<Record<DicomTag, DicomAttribute>>;
 
 /** A DICOM attribute. */
 export interface DicomAttribute {

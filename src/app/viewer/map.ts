@@ -21,33 +21,33 @@ function fetchImages(server: DicomServer, slide: DicomJson) {
 	/** The options to select the current series. */
 	const seriesOptions = {
 		baseUrl: server.url,
-		studyUid: slide[DicomTag.StudyInstanceUID].Value?.[0] as string,
-		seriesUid: slide[DicomTag.SeriesInstanceUID].Value?.[0] as string,
+		studyUid: slide[DicomTag.StudyInstanceUID]!.Value?.[0] as string,
+		seriesUid: slide[DicomTag.SeriesInstanceUID]!.Value?.[0] as string,
 	};
 
 	/** Sorts the image instances by their size. */
 	const sortImagingInfo = (a: DicomJson | undefined, b: DicomJson | undefined) => {
 		if (!a || !b) return 0;
-		const aTotalPixelMatrixColumns = a[DicomTag.TotalPixelMatrixColumns].Value?.[0] as number;
-		const aTotalPixelMatrixRows = a[DicomTag.TotalPixelMatrixRows].Value?.[0] as number;
-		const aNumberOfFrames = a[DicomTag.NumberOfFrames].Value?.[0] as number;
-		const bTotalPixelMatrixColumns = b[DicomTag.TotalPixelMatrixColumns].Value?.[0] as number;
-		const bTotalPixelMatrixRows = b[DicomTag.TotalPixelMatrixRows].Value?.[0] as number;
-		const bNumberOfFrames = b[DicomTag.NumberOfFrames].Value?.[0] as number;
+		const aTotalPixelMatrixColumns = a[DicomTag.TotalPixelMatrixColumns]!.Value?.[0] as number;
+		const aTotalPixelMatrixRows = a[DicomTag.TotalPixelMatrixRows]!.Value?.[0] as number;
+		const aNumberOfFrames = a[DicomTag.NumberOfFrames]!.Value?.[0] as number;
+		const bTotalPixelMatrixColumns = b[DicomTag.TotalPixelMatrixColumns]!.Value?.[0] as number;
+		const bTotalPixelMatrixRows = b[DicomTag.TotalPixelMatrixRows]!.Value?.[0] as number;
+		const bNumberOfFrames = b[DicomTag.NumberOfFrames]!.Value?.[0] as number;
 		const aSize = aTotalPixelMatrixColumns * aTotalPixelMatrixRows;
 		const bSize = bTotalPixelMatrixColumns * bTotalPixelMatrixRows;
 		return aSize === bSize ? aNumberOfFrames - bNumberOfFrames : aSize - bSize;
 	};
 
 	return fetchDicomJson({ ...seriesOptions, name: 'instances' })
-		.then((data) => data.map((instance) => instance[DicomTag.SOPInstanceUID].Value?.[0] as string))
+		.then((data) => data.map((instance) => instance[DicomTag.SOPInstanceUID]!.Value?.[0] as string))
 		.then((data) => data.map((instanceUid) => fetchDicomJson({ ...seriesOptions, instanceUid, name: 'metadata' })))
 		.then((data) => Promise.all(data).then((data) => data.map((d) => d[0])))
 		.then((data) => ({
-			label: data.find((d) => d[DicomTag.ImageType].Value?.includes('LABEL')) || null,
-			overview: data.find((d) => d[DicomTag.ImageType].Value?.includes('OVERVIEW')) || null,
-			thumbnail: data.find((d) => d[DicomTag.ImageType].Value?.includes('THUMBNAIL')) || null,
-			volumes: data.filter((d) => d[DicomTag.ImageType].Value?.includes('VOLUME')).sort(sortImagingInfo),
+			label: data.find((d) => d[DicomTag.ImageType]!.Value?.includes('LABEL')) || null,
+			overview: data.find((d) => d[DicomTag.ImageType]!.Value?.includes('OVERVIEW')) || null,
+			thumbnail: data.find((d) => d[DicomTag.ImageType]!.Value?.includes('THUMBNAIL')) || null,
+			volumes: data.filter((d) => d[DicomTag.ImageType]!.Value?.includes('VOLUME')).sort(sortImagingInfo),
 		}));
 }
 
@@ -59,7 +59,7 @@ function fetchImages(server: DicomServer, slide: DicomJson) {
  * @returns {number[]} Spacing between pixel columns and rows in millimeter
  */
 function getPixelSpacing(metadata: DicomJson) {
-	const functionalGroup = metadata[DicomTag.SharedFunctionalGroupsSequence].Value?.[0] as DicomJson | undefined;
+	const functionalGroup = metadata[DicomTag.SharedFunctionalGroupsSequence]!.Value?.[0] as DicomJson | undefined;
 	const pixelMeasures = functionalGroup?.[DicomTag.PixelMeasuresSequence]?.Value?.[0] as DicomJson | undefined;
 	if (!pixelMeasures) return [1, 1];
 
@@ -89,16 +89,16 @@ function computePyramidInfo(images: DicomJson[]) {
 	const instanceResolutions: Record<string, number> = {};
 
 	const baseImage = images[images.length - 1];
-	const baseTotalPixelMatrixColumns = baseImage[DicomTag.TotalPixelMatrixColumns].Value?.[0] as number;
-	const baseTotalPixelMatrixRows = baseImage[DicomTag.TotalPixelMatrixRows].Value?.[0] as number;
+	const baseTotalPixelMatrixColumns = baseImage[DicomTag.TotalPixelMatrixColumns]!.Value?.[0] as number;
+	const baseTotalPixelMatrixRows = baseImage[DicomTag.TotalPixelMatrixRows]!.Value?.[0] as number;
 
 	for (let j = images.length - 1; j >= 0; j--) {
 		const image = images[j];
-		const instanceUid = image[DicomTag.SOPInstanceUID].Value?.[0] as string;
-		const columns = image[DicomTag.Columns].Value?.[0] as number;
-		const rows = image[DicomTag.Rows].Value?.[0] as number;
-		const totalPixelMatrixColumns = image[DicomTag.TotalPixelMatrixColumns].Value?.[0] as number;
-		const totalPixelMatrixRows = image[DicomTag.TotalPixelMatrixRows].Value?.[0] as number;
+		const instanceUid = image[DicomTag.SOPInstanceUID]!.Value?.[0] as string;
+		const columns = image[DicomTag.Columns]!.Value?.[0] as number;
+		const rows = image[DicomTag.Rows]!.Value?.[0] as number;
+		const totalPixelMatrixColumns = image[DicomTag.TotalPixelMatrixColumns]!.Value?.[0] as number;
+		const totalPixelMatrixRows = image[DicomTag.TotalPixelMatrixRows]!.Value?.[0] as number;
 		const pixelSpacing = getPixelSpacing(image) || [1, 1];
 
 		const nColumns = Math.ceil(totalPixelMatrixColumns / columns);
@@ -189,8 +189,8 @@ export function useMap(id: string, server: DicomServer, slide: DicomJson | null)
 			});
 
 			const baseUrl = server.url;
-			const studyUid = slide[DicomTag.StudyInstanceUID].Value?.[0] as string;
-			const seriesUid = slide[DicomTag.SeriesInstanceUID].Value?.[0] as string;
+			const studyUid = slide[DicomTag.StudyInstanceUID]!.Value?.[0] as string;
+			const seriesUid = slide[DicomTag.SeriesInstanceUID]!.Value?.[0] as string;
 
 			const layer = new TileLayer({
 				source: new XYZ({
@@ -201,9 +201,9 @@ export function useMap(id: string, server: DicomServer, slide: DicomJson | null)
 					},
 					tileUrlFunction: ([z, x, y]: number[]) => {
 						const image = images.volumes[z];
-						const instanceUid = image[DicomTag.SOPInstanceUID].Value?.[0] as string;
-						const totalPixelMatrixColumns = image[DicomTag.TotalPixelMatrixColumns].Value?.[0] as number;
-						const columns = image[DicomTag.Columns].Value?.[0] as number;
+						const instanceUid = image[DicomTag.SOPInstanceUID]!.Value?.[0] as string;
+						const totalPixelMatrixColumns = image[DicomTag.TotalPixelMatrixColumns]!.Value?.[0] as number;
+						const columns = image[DicomTag.Columns]!.Value?.[0] as number;
 						const frameNumber = x + y * Math.ceil(totalPixelMatrixColumns / columns) + 1;
 						return toDicomWebUri({ baseUrl, studyUid, seriesUid, instanceUid, frameNumber, name: 'rendered' });
 					},

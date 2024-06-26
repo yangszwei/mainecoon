@@ -22,8 +22,8 @@ function fetchAnnotationSeries(server: DicomServer, slide: DicomJson | null): Pr
 	}
 
 	const baseUrl = server.url;
-	const studyUid = slide[DicomTag.StudyInstanceUID].Value?.[0] as string;
-	const slideUid = slide[DicomTag.SeriesInstanceUID].Value?.[0] as string;
+	const studyUid = slide[DicomTag.StudyInstanceUID]!.Value?.[0] as string;
+	const slideUid = slide[DicomTag.SeriesInstanceUID]!.Value?.[0] as string;
 	const searchParams = new URLSearchParams({ [DicomTag.Modality]: 'ANN' });
 
 	return fetchDicomJson({ baseUrl, studyUid, name: 'series', searchParams })
@@ -81,7 +81,7 @@ function calculateEllipsePoints(points: number[][]) {
 function getReferenceInstanceUid(group: DicomJson) {
 	const referenceSeries = group[DicomTag.ReferencedSeriesSequence]?.Value?.[0] as DicomJson;
 	const referencedInstance = referenceSeries?.[DicomTag.ReferencedInstanceSequence]?.Value?.[0] as DicomJson;
-	return referencedInstance?.[DicomTag.ReferencedSOPInstanceUID].Value?.[0] as string | undefined;
+	return referencedInstance?.[DicomTag.ReferencedSOPInstanceUID]!.Value?.[0] as string | undefined;
 }
 
 /**
@@ -103,20 +103,22 @@ async function createAnnotationSource(
 		return source;
 	}
 
-	const graphicType = group[DicomTag.GraphicType].Value?.[0] as string;
+	const graphicType = group[DicomTag.GraphicType]!.Value?.[0] as string;
 	const pointCoordinatesData = group[DicomTag.PointCoordinatesData];
 	const pointIndexList = group[DicomTag.LongPrimitivePointIndexList];
 
 	let points: Float64Array | Float32Array | undefined;
 	let indexes: Uint32Array | undefined;
 
-	if (pointCoordinatesData.InlineBinary) {
-		points = decodeValue(pointCoordinatesData.vr, pointCoordinatesData.InlineBinary) as Float64Array | Float32Array;
-	} else if (pointCoordinatesData.BulkDataURI) {
-		// Fetch the bulk data URI
-		const response = await fetch(pointCoordinatesData.BulkDataURI);
-		const bulkData = multipartDecode(await response.arrayBuffer());
-		points = decodeValue(pointCoordinatesData.vr, bulkData) as Float64Array | Float32Array;
+	if (pointCoordinatesData) {
+		if (pointCoordinatesData.InlineBinary) {
+			points = decodeValue(pointCoordinatesData.vr, pointCoordinatesData.InlineBinary) as Float64Array | Float32Array;
+		} else if (pointCoordinatesData.BulkDataURI) {
+			// Fetch the bulk data URI
+			const response = await fetch(pointCoordinatesData.BulkDataURI);
+			const bulkData = multipartDecode(await response.arrayBuffer());
+			points = decodeValue(pointCoordinatesData.vr, bulkData) as Float64Array | Float32Array;
+		}
 	}
 
 	const resolution = instanceUid ? resolutions[instanceUid] : Math.max(...Object.values(resolutions)) || 1;
@@ -241,14 +243,14 @@ export function useAnnotations(server: DicomServer, slide: DicomJson | null) {
 			const annotations: AnnotationMap = { series: {}, configs: {} };
 
 			for (const series of annotationSeries) {
-				const seriesUid = series[DicomTag.SeriesInstanceUID].Value?.[0] as string;
+				const seriesUid = series[DicomTag.SeriesInstanceUID]!.Value?.[0] as string;
 				const groups = series[DicomTag.AnnotationGroupSequence]?.Value as DicomJson[];
 
 				annotations.series[seriesUid] = { dicomJson: series, groups: {} };
 				annotations.configs[seriesUid] = {};
 
 				for (const group of groups || []) {
-					const groupUid = group[DicomTag.AnnotationGroupUID].Value?.[0] as string;
+					const groupUid = group[DicomTag.AnnotationGroupUID]!.Value?.[0] as string;
 
 					annotations.series[seriesUid].groups[groupUid] = group;
 					annotations.configs[seriesUid][groupUid] = { loading: true, visible: true };

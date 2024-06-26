@@ -45,7 +45,7 @@ export default function ViewerPage() {
 
 	// Set the current slide when the search params changes.
 	useEffect(() => {
-		const selectedSlide = slides.find((slide) => slide[DicomTag.SeriesInstanceUID].Value?.[0] === seriesUid);
+		const selectedSlide = slides.find((slide) => slide[DicomTag.SeriesInstanceUID]!.Value?.[0] === seriesUid);
 		setCurrentSlide(selectedSlide || slides[0]);
 	}, [seriesUid, slides]);
 
