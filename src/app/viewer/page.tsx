@@ -2,7 +2,7 @@
 
 import { DicomJson, DicomTag } from '@/lib/dicom-web';
 import Drawer, { DrawerSection } from '@/app/_components/Drawer';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import AnnotationList from './AnnotationList';
 import Header from '@/app/_components/Header';
 import Image from 'next/image';
@@ -43,6 +43,11 @@ export default function ViewerPage() {
 	const [currentSlide, setCurrentSlide] = useState<DicomJson | null>(null);
 	const [annotations, updateAnnotation] = useAnnotations(server, currentSlide);
 
+	const randomAnimation = useMemo(() => {
+		const animations = ['animate-ping', 'animate-bounce', 'animate-spin', 'animate-ping', 'animate-pulse'];
+		return animations[Math.floor(Math.random() * animations.length)];
+	}, []);
+
 	// Set the current slide when the search params changes.
 	useEffect(() => {
 		const selectedSlide = slides.find((slide) => slide[DicomTag.SeriesInstanceUID]!.Value?.[0] === seriesUid);
@@ -81,7 +86,7 @@ export default function ViewerPage() {
 						<p className="flex h-full items-center justify-center text-gray-500">No slide selected</p>
 					) : (
 						<p className="flex h-full items-center justify-center text-gray-500">
-							<Image src={icon} height={120} width={120} className="animate-spin rounded-full" alt="" />
+							<Image src={icon} height={120} width={120} className={`${randomAnimation} rounded-full`} alt="" />
 						</p>
 					)}
 				</main>
