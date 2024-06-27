@@ -37,16 +37,28 @@ function useOptions() {
 	return { server, studyUid, seriesUid };
 }
 
+/**
+ * Generates a random animation class for the loader.
+ *
+ * @returns The random animation class.
+ */
+function useLoaderAnimation() {
+	const [loader, setLoader] = useState('');
+
+	useEffect(() => {
+		const animations = ['animate-ping', 'animate-bounce', 'animate-spin', 'animate-ping', 'animate-pulse'];
+		setLoader(animations[Math.floor(Math.random() * animations.length)]);
+	}, []);
+
+	return loader;
+}
+
 export default function ViewerPage() {
 	const { server, studyUid, seriesUid } = useOptions();
 	const [study, slides] = useStudy(server, studyUid);
 	const [currentSlide, setCurrentSlide] = useState<DicomJson | null>(null);
 	const [annotations, updateAnnotation] = useAnnotations(server, currentSlide);
-
-	const randomAnimation = useMemo(() => {
-		const animations = ['animate-ping', 'animate-bounce', 'animate-spin', 'animate-ping', 'animate-pulse'];
-		return animations[Math.floor(Math.random() * animations.length)];
-	}, []);
+	const loaderAnimation = useLoaderAnimation();
 
 	// Set the current slide when the search params changes.
 	useEffect(() => {
@@ -86,7 +98,7 @@ export default function ViewerPage() {
 						<p className="flex h-full items-center justify-center text-gray-500">No slide selected</p>
 					) : (
 						<p className="flex h-full items-center justify-center text-gray-500">
-							<Image src={icon} height={120} width={120} className={`${randomAnimation} rounded-full`} alt="" />
+							<Image src={icon} height={120} width={120} className={`${loaderAnimation} rounded-full`} alt="" />
 						</p>
 					)}
 				</main>
