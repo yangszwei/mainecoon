@@ -263,6 +263,10 @@ export function useAnnotations(server: DicomServer, slide: DicomJson | null) {
 		}
 
 		loadAnnotations();
+
+		return () => {
+			setAnnotations({ loading: true, series: {}, configs: {} });
+		};
 	}, [server, slide]);
 
 	const updateAnnotation = useCallback((seriesUid: string, groupUid: string, update: Partial<AnnotationConfig>) => {
@@ -341,6 +345,7 @@ export function useAnnotationGroupLayers(
 		return () => {
 			if (map) {
 				layers.current.forEach((layer) => map.removeLayer(layer));
+				layers.current.length = 0;
 			}
 		};
 	}, [mapRef, annotations.series, resolutions, updateAnnotation]);

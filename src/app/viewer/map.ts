@@ -262,6 +262,14 @@ export function useMap(id: string, server: DicomServer, slide: DicomJson | null)
 		}
 
 		loadMap();
+
+		return () => {
+			if (mapRef.current) {
+				mapRef.current.dispose();
+				mapRef.current.setTarget(undefined);
+				mapRef.current = null;
+			}
+		};
 	}, [id, server, slide]);
 
 	return [mapRef, resolutions, loading] as const;
