@@ -214,6 +214,7 @@ export interface AnnotationConfig {
 
 /** A map of annotation groups keyed by their UID. */
 export interface AnnotationMap {
+	loading: boolean;
 	series: {
 		[seriesUid: string]: {
 			dicomJson: DicomJson;
@@ -233,14 +234,15 @@ export interface AnnotationMap {
  * @returns The annotations series and their configurations.
  */
 export function useAnnotations(server: DicomServer, slide: DicomJson | null) {
-	const [annotations, setAnnotations] = useState<AnnotationMap>({ series: {}, configs: {} });
-	const [refresh, setRefresh] = useState(false);
+	const [annotations, setAnnotations] = useState<AnnotationMap>({ loading: true, series: {}, configs: {} });
 
 	useEffect(() => {
 		async function loadAnnotations() {
+			if (!server || !slide) return;
+
 			const annotationSeries = await fetchAnnotationSeries(server, slide);
 
-			const annotations: AnnotationMap = { series: {}, configs: {} };
+			const annotations: AnnotationMap = { loading: false, series: {}, configs: {} };
 
 			for (const series of annotationSeries) {
 				const seriesUid = series[DicomTag.SeriesInstanceUID]!.Value?.[0] as string;

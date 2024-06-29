@@ -46,7 +46,7 @@ function useLoaderAnimation() {
 	const [loader, setLoader] = useState('');
 
 	useEffect(() => {
-		const animations = ['animate-ping', 'animate-bounce', 'animate-spin', 'animate-ping', 'animate-pulse'];
+		const animations = ['animate-spin', 'animate-ping', 'animate-pulse', 'animate-bounce'];
 		setLoader(animations[Math.floor(Math.random() * animations.length)]);
 	}, []);
 
@@ -55,10 +55,11 @@ function useLoaderAnimation() {
 
 export default function ViewerPage() {
 	const { server, studyUid, seriesUid } = useOptions();
-	const [study, slides] = useStudy(server, studyUid);
+	const [study, slides, loading] = useStudy(server, studyUid);
 	const [currentSlide, setCurrentSlide] = useState<DicomJson | null>(null);
 	const [annotations, updateAnnotation] = useAnnotations(server, currentSlide);
 	const loaderAnimation = useLoaderAnimation();
+	const notFound = useMemo(() => !loading && !study, [loading, study]);
 
 	// Set the current slide when the search params changes.
 	useEffect(() => {
@@ -72,10 +73,10 @@ export default function ViewerPage() {
 			<div className="flex h-full pt-16">
 				<Drawer placement="left">
 					<DrawerSection title="Patient" open>
-						<PatientDescription study={study} />
+						<PatientDescription study={study} notFound={notFound} />
 					</DrawerSection>
 					<DrawerSection title="Study" open>
-						<StudyDescription study={study} />
+						<StudyDescription study={study} notFound={notFound} />
 					</DrawerSection>
 					<DrawerSection title="Slides" open>
 						<SlideList
@@ -83,28 +84,29 @@ export default function ViewerPage() {
 							studyUid={studyUid}
 							slides={slides}
 							currentSlideState={[currentSlide, setCurrentSlide]}
+							notFound={notFound}
 						/>
 					</DrawerSection>
 				</Drawer>
 				<main className="grow">
-					{currentSlide ? (
+					{loading ? (
+						<p className="flex h-full items-center justify-center text-gray-500">
+							<Image src={icon} height={120} width={120} className={`${loaderAnimation} rounded-full`} alt="" />
+						</p>
+					) : currentSlide ? (
 						<SlideViewer
 							server={server}
 							slide={currentSlide}
 							annotations={annotations}
 							updateAnnotation={updateAnnotation}
 						/>
-					) : slides.length > 0 ? (
-						<p className="flex h-full items-center justify-center text-gray-500">No slide selected</p>
 					) : (
-						<p className="flex h-full items-center justify-center text-gray-500">
-							<Image src={icon} height={120} width={120} className={`${loaderAnimation} rounded-full`} alt="" />
-						</p>
+						<p className="flex h-full items-center justify-center text-gray-500">No slide selected</p>
 					)}
 				</main>
 				<Drawer placement="right">
 					<DrawerSection title="Annotations" open>
-						<AnnotationList annotations={annotations} updateAnnotation={updateAnnotation} />
+						<AnnotationList annotations={annotations} updateAnnotation={updateAnnotation} notFound={notFound} />
 					</DrawerSection>
 				</Drawer>
 			</div>

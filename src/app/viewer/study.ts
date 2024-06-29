@@ -8,11 +8,12 @@ import { DicomServer } from '@/config/dicom-web';
  *
  * @param server The DICOMweb server.
  * @param studyUid The study instance UID.
- * @returns The study and slide (SM) series.
+ * @returns The study metadata, slide (SM) series, and a flag indicating if the study was not found.
  */
 export function useStudy(server: DicomServer, studyUid: string | null) {
 	const [study, setStudy] = useState<DicomJson | null>(null);
 	const [slides, setSlides] = useState<DicomJson[]>([]);
+	const [loading, setLoading] = useState(true);
 	const baseUrl = server.url;
 
 	useEffect(() => {
@@ -41,9 +42,13 @@ export function useStudy(server: DicomServer, studyUid: string | null) {
 			setSlides(slides.map((s) => s[0]));
 		}
 
-		fetchStudy();
-		fetchSlides();
+		// Fetch the study and slides, and then set the loading flag to false.
+		Promise.all([fetchStudy(), fetchSlides()]).finally(() => {
+			if (baseUrl && studyUid) {
+				setLoading(false);
+			}
+		});
 	}, [baseUrl, studyUid]);
 
-	return [study, slides] as const;
+	return [study, slides, loading] as const;
 }

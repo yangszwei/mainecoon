@@ -64,11 +64,11 @@ export const fetchDicomJson = async (options: FetchOptions): Promise<DicomJson[]
 	const response = await fetch(toDicomWebUri(options), {
 		headers: { Accept: 'application/dicom+json' },
 	});
-	if (!response.ok) {
+	if (!response.ok && response.status !== 404) {
 		throw new Error(`Failed to fetch: [${response.status}] ${(await response.text()) || response.statusText}`);
 	}
 
-	if (response.status === 204) {
+	if (response.status === 204 || response.status === 404) {
 		return [];
 	}
 

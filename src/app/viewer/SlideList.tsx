@@ -13,12 +13,18 @@ export interface SlideListProps {
 	slides: DicomJson[];
 	/** The current slide state. */
 	currentSlideState: [DicomJson | null, (slide: DicomJson | null) => void];
+	/** Whether the study was not found. */
+	notFound: boolean;
 }
 
 /** Display the available slides in the study to select from. */
-export default function SlideList({ server, studyUid, slides, currentSlideState }: Readonly<SlideListProps>) {
+export default function SlideList({ server, studyUid, slides, currentSlideState, notFound }: Readonly<SlideListProps>) {
 	const [currentSlide, setCurrentSlide] = currentSlideState;
 	const baseUrl = server.url;
+
+	if (notFound) {
+		return <p className="p-3.5 text-center text-sm tracking-wide text-gray-500">No slides available</p>;
+	}
 
 	if (slides.length === 0) {
 		return (

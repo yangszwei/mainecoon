@@ -82,11 +82,20 @@ function AnnotationGroupList({ index, series, configs, updateAnnotation }: Reado
 export interface AnnotationListProps {
 	annotations: AnnotationMap;
 	updateAnnotation: (seriesUid: string, groupUid: string, update: Partial<AnnotationConfig>) => void;
+	notFound: boolean;
 }
 
-export default function AnnotationList({ annotations, updateAnnotation }: Readonly<AnnotationListProps>) {
-	if (!annotations) {
-		return null;
+export default function AnnotationList({ annotations, updateAnnotation, notFound }: Readonly<AnnotationListProps>) {
+	if (annotations.loading && !notFound) {
+		return (
+			<p className="p-3 text-center">
+				<span className="spinner-sm border-green-500" />
+			</p>
+		);
+	}
+
+	if (Object.keys(annotations.series).length === 0 || notFound) {
+		return <p className="p-3.5 text-center text-sm tracking-wide text-gray-500">No annotations available</p>;
 	}
 
 	return (
