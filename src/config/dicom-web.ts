@@ -1,5 +1,5 @@
 /** The config for a single DICOMweb server. */
-export type DicomServer = { name: string; url: string };
+export type DicomServer = { name: string; url: string; raw: string };
 
 /** The available DICOMweb servers, keyed by display name. */
 export const servers: { [name: string]: DicomServer } = (() => {
@@ -10,8 +10,8 @@ export const servers: { [name: string]: DicomServer } = (() => {
 		const parts = serverString.split('=');
 		let [name, url] = parts.length > 1 ? parts : [new URL(parts[0]).host, parts[0]];
 		if (Object.hasOwn(servers, name)) throw new Error(`Duplicate DICOMweb server name: ${name}`);
-		if (!servers.default) servers.default = { name, url };
-		servers[name || new URL(url).origin] = { name, url };
+		if (!servers.default) servers.default = { name, url, raw: serverString };
+		servers[name || new URL(url).origin] = { name, url, raw: serverString };
 	}
 
 	return servers;

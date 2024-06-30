@@ -33,6 +33,16 @@ export default function SearchForm({ server, setStudies, isLoadingState }: Reado
 	const [isLoading, setIsLoading] = isLoadingState;
 	const formRef = useRef<HTMLFormElement>(null);
 
+	// Reset the pagination when the server changes.
+	useEffect(() => {
+		const initialFormData = new FormData();
+		initialFormData.set('baseUrl', server.url);
+		initialFormData.set('limit', '10');
+		initialFormData.set('offset', '0');
+		setFormData(initialFormData);
+		setPage({ limit: 10, offset: 0 });
+	}, [server]);
+
 	const updateStudies = useCallback(
 		() => {
 			const currentFormData = new FormData(formRef.current!);
@@ -84,6 +94,7 @@ export default function SearchForm({ server, setStudies, isLoadingState }: Reado
 					label="Limit"
 					name="limit"
 					type="number"
+					min={0}
 					onChange={(e) => setPage({ ...page, limit: parseInt(e.currentTarget.value) })}
 					value={page.limit}
 				/>
@@ -92,6 +103,7 @@ export default function SearchForm({ server, setStudies, isLoadingState }: Reado
 					label="Offset"
 					name="offset"
 					type="number"
+					min={0}
 					onChange={(e) => setPage({ ...page, offset: parseInt(e.currentTarget.value) })}
 					value={page.offset}
 				/>

@@ -69,7 +69,7 @@ export default function ViewerPage() {
 
 	return (
 		<>
-			<Header className="h-16" />
+			<Header className="h-16" server={server} />
 			<div className="flex h-full pt-16">
 				<Drawer placement="left">
 					<DrawerSection title="Patient" open>

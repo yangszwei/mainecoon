@@ -47,7 +47,7 @@ export default function Drawer({ className, placement, children }: Readonly<Draw
 
 	return (
 		<aside
-			className={`relative h-full w-72 shrink-0 overflow-auto bg-white shadow-sm ${placementClass} ${className || ''}`}
+			className={`relative h-full w-80 shrink-0 overflow-auto bg-white shadow-sm ${placementClass} ${className || ''}`}
 		>
 			{children}
 		</aside>
