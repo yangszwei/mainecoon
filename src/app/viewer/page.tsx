@@ -12,7 +12,7 @@ import SlideViewer from './SlideViewer';
 import StudyDescription from './StudyDescription';
 import icon from '@/app/icon.png';
 import { servers } from '@/config/dicom-web';
-import { useAnnotations } from '@/app/viewer/annotation';
+import { useAnnotationMap } from '@/app/viewer/annotation';
 import { useSearchParams } from 'next/navigation';
 import { useStudy } from './study';
 
@@ -57,7 +57,7 @@ export default function ViewerPage() {
 	const { server, studyUid, seriesUid } = useOptions();
 	const [study, slides, loading] = useStudy(server, studyUid);
 	const [currentSlide, setCurrentSlide] = useState<DicomJson | null>(null);
-	const [annotations, updateAnnotation] = useAnnotations(server, currentSlide);
+	const [annotationMap, updateAnnotationMap] = useAnnotationMap(server, currentSlide);
 	const loaderAnimation = useLoaderAnimation();
 	const notFound = useMemo(() => !loading && !study, [loading, study]);
 
@@ -97,8 +97,8 @@ export default function ViewerPage() {
 						<SlideViewer
 							server={server}
 							slide={currentSlide}
-							annotations={annotations}
-							updateAnnotation={updateAnnotation}
+							annotationMap={annotationMap}
+							updateAnnotationMap={updateAnnotationMap}
 						/>
 					) : (
 						<p className="flex h-full items-center justify-center text-gray-500">No slide selected</p>
@@ -106,7 +106,11 @@ export default function ViewerPage() {
 				</main>
 				<Drawer placement="right">
 					<DrawerSection title="Annotations" open>
-						<AnnotationList annotations={annotations} updateAnnotation={updateAnnotation} notFound={notFound} />
+						<AnnotationList
+							annotationMap={annotationMap}
+							updateAnnotationMap={updateAnnotationMap}
+							notFound={notFound}
+						/>
 					</DrawerSection>
 				</Drawer>
 			</div>

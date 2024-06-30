@@ -1,9 +1,10 @@
 'use client';
 
 import 'ol/ol.css';
-import { AnnotationConfig, AnnotationMap, useAnnotationGroupLayers } from './annotation';
+import type { AnnotationMap, AnnotationMapAction } from './annotation';
 import type { DicomJson } from '@/lib/dicom-web';
 import type { DicomServer } from '@/config/dicom-web';
+import { useAnnotationLayers } from '@/app/viewer/annotation';
 import { useMap } from './map';
 
 /** The props for the SlideViewer component. */
@@ -12,17 +13,17 @@ export interface SlideViewerProps {
 	server: DicomServer;
 	/** The DICOM JSON object of the current slide. */
 	slide: DicomJson | null;
-	/** The list of annotations for the current slide. */
-	annotations: AnnotationMap;
+	/** The map of annotations for the current slide. */
+	annotationMap: AnnotationMap;
 	/** The function to update an annotation. */
-	updateAnnotation: (seriesUid: string, groupUid: string, update: Partial<AnnotationConfig>) => void;
+	updateAnnotationMap: (action: AnnotationMapAction) => void;
 }
 
-export default function SlideViewer({ server, slide, annotations, updateAnnotation }: Readonly<SlideViewerProps>) {
+export default function SlideViewer({ server, slide, annotationMap, updateAnnotationMap }: Readonly<SlideViewerProps>) {
 	const [mapRef, resolutions, loading] = useMap('map', server, slide);
 
-	// Add the annotation layers to the map.
-	useAnnotationGroupLayers(mapRef, annotations, resolutions, updateAnnotation);
+	// Load the annotation layers.
+	useAnnotationLayers(mapRef, annotationMap, updateAnnotationMap, resolutions);
 
 	return (
 		<div className="relative h-full w-full overflow-hidden">

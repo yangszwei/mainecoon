@@ -226,7 +226,7 @@ export function useMap(id: string, server: DicomServer, slide: DicomJson | null)
 			const view = new View({
 				center: getCenter(extent),
 				projection: projection,
-				resolutions: pyramidInfo.resolutions,
+				minResolution: pyramidInfo.resolutions[pyramidInfo.resolutions.length - 1],
 				constrainOnlyCenter: false,
 				smoothResolutionConstraint: true,
 				showFullExtent: true,
@@ -267,6 +267,7 @@ export function useMap(id: string, server: DicomServer, slide: DicomJson | null)
 
 		return () => {
 			if (mapRef.current) {
+				mapRef.current.getLayers().forEach((layer) => layer.dispose());
 				mapRef.current.dispose();
 				mapRef.current.setTarget(undefined);
 				mapRef.current = null;

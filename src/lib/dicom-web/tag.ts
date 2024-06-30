@@ -30,6 +30,7 @@ export enum DicomTag {
 	AnnotationGroupSequence = '006A0002',
 	AnnotationGroupUID = '006A0003',
 	AnnotationGroupLabel = '006A0005',
+	NumberOfAnnotations = '006A000C',
 	GraphicType = '00700023',
 	SharedFunctionalGroupsSequence = '52009229',
 }
