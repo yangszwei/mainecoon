@@ -13,7 +13,7 @@ function AppTitle({ server }: Readonly<{ server: DicomServer }>) {
 			className="flex select-none items-center gap-3 text-2xl text-white"
 		>
 			<Image src={icon} className="object-contain" draggable="false" height={48} width={48} alt="" />
-			<span className="font-serif font-bold uppercase tracking-wider">MaineCoon</span>
+			<span className="font-serif font-bold uppercase tracking-wider">Mainecoon</span>
 		</Link>
 	);
 }

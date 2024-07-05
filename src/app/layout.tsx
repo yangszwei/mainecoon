@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 import { Suspense } from 'react';
 
 export const metadata: Metadata = {
-	title: 'MaineCoon',
+	title: 'Mainecoon',
 	description: 'Web-based Digital Pathology Viewer',
 };
 
