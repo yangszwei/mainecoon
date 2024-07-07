@@ -1,19 +1,31 @@
 import type * as ol from 'ol';
 import { $dicom, DicomTag } from '@/lib/dicom-web';
-import { Geometry, MultiLineString, MultiPoint, MultiPolygon } from 'ol/geom';
+import { Draw, Interaction } from 'ol/interaction';
+import { Geometry, MultiLineString, MultiPoint, MultiPolygon, Polygon } from 'ol/geom';
 import { useEffect, useRef } from 'react';
 import type { DicomJson } from '@/lib/dicom-web';
 import type { DicomServer } from '@/config/dicom-web';
 import { Feature } from 'ol';
+import type { GeometryFunction } from 'ol/interaction/Draw';
 import type { MutableRefObject } from 'react';
+import type { Type } from 'ol/geom/Geometry';
 import VectorImageLayer from 'ol/layer/VectorImage';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
+import { createBox } from 'ol/interaction/Draw';
 import { decodeValue } from '@/lib/dicom-web/vr';
 import { fetchDicomJson } from '@/lib/dicom-web';
 import { imageLayerThreshold } from '@/lib/constants';
 import { multipartDecode } from '@/lib/utils/multipart';
 import { useImmerReducer } from 'use-immer';
+
+export enum GraphicType {
+	Point = 'POINT',
+	Polyline = 'POLYLINE',
+	Polygon = 'POLYGON',
+	Ellipse = 'ELLIPSE',
+	Rectangle = 'RECTANGLE',
+}
 
 export interface Annotation {
 	seriesUid: string;
@@ -21,7 +33,7 @@ export interface Annotation {
 	name: string;
 	status: 'initialized' | 'ready' | 'loading' | 'error';
 	color: string;
-	graphicType: string;
+	graphicType: GraphicType;
 	numberOfAnnotations: number;
 	dicomJson?: DicomJson;
 	editable: boolean;
@@ -30,19 +42,25 @@ export interface Annotation {
 
 export type AnnotationMap = {
 	[seriesUid: string]: {
+		editable: boolean;
 		referenceInstanceUid?: string;
 		groupMap: { [groupUid: string]: Annotation };
 	};
 };
 
 export type AnnotationMapAction =
-	| { type: 'create'; seriesUid?: string; annotation: Annotation }
+	| { type: 'create'; seriesUid?: string; annotation: Pick<Annotation, 'name' | 'color' | 'graphicType'> }
 	| { type: 'update'; seriesUid: string; groupUid: string; annotation: Partial<Annotation> }
 	| { type: 'delete'; seriesUid: string; groupUid?: string }
 	| { type: 'reset'; annotationMap: AnnotationMap }
 	| { type: 'refresh' };
 
-export function useAnnotationMap(server: DicomServer, slide: DicomJson | null) {
+export function useAnnotationMap(
+	server: DicomServer,
+	slide: DicomJson | null,
+	currentAnnotation: Annotation | null,
+	setCurrentAnnotation: (annotation: Annotation | null) => void,
+) {
 	const [annotationMap, updateAnnotationMap] = useImmerReducer(reducer, {} as AnnotationMap);
 
 	function reducer(annotationMap: AnnotationMap, action: AnnotationMapAction) {
@@ -51,11 +69,20 @@ export function useAnnotationMap(server: DicomServer, slide: DicomJson | null) {
 			case 'create':
 				const seriesUid = action.seriesUid || `draft-series-${self.crypto.randomUUID()}`;
 				const groupUid = `draft-group-${self.crypto.randomUUID()}`;
-				annotationMap[seriesUid] ||= {
-					referenceInstanceUid: getReferenceInstanceUid(action.annotation.dicomJson!),
-					groupMap: {},
+				annotationMap[seriesUid] ||= { editable: true, groupMap: {} };
+				const annotation: Annotation = {
+					...action.annotation,
+					seriesUid,
+					groupUid,
+					status: 'ready',
+					numberOfAnnotations: 0,
+					editable: true,
+					visible: true,
 				};
-				annotationMap[seriesUid].groupMap[groupUid] = action.annotation;
+
+				annotationMap[seriesUid].groupMap[groupUid] = annotation;
+				setCurrentAnnotation(annotation);
+
 				return annotationMap;
 
 			// Update an annotation group.
@@ -66,13 +93,27 @@ export function useAnnotationMap(server: DicomServer, slide: DicomJson | null) {
 				};
 				return annotationMap;
 
-			// Delete an annotation group, or the entire series if no group is specified.
+			// Delete an annotation group, or the entire series if no group is specified. If no group is left after deletion, the series is also deleted.
 			case 'delete':
+				// Remove the group or the entire series from the annotation map
 				if (action.groupUid) {
 					delete annotationMap[action.seriesUid].groupMap[action.groupUid];
 				} else {
 					delete annotationMap[action.seriesUid];
 				}
+				if (Object.keys(annotationMap[action.seriesUid]?.groupMap || {}).length === 0) {
+					delete annotationMap[action.seriesUid];
+				}
+
+				// Clear the current annotation if it's being deleted
+				if (
+					currentAnnotation &&
+					currentAnnotation.seriesUid === action.seriesUid &&
+					(!action.groupUid || currentAnnotation.groupUid === action.groupUid)
+				) {
+					setCurrentAnnotation(null);
+				}
+
 				return annotationMap;
 
 			// Reset the annotation map.
@@ -108,7 +149,7 @@ export function useAnnotationMap(server: DicomServer, slide: DicomJson | null) {
 						name: $dicom(group, DicomTag.AnnotationGroupLabel),
 						status: 'initialized',
 						color: '',
-						graphicType: group[DicomTag.GraphicType]?.Value?.[0] as string,
+						graphicType: group[DicomTag.GraphicType]?.Value?.[0] as GraphicType,
 						numberOfAnnotations: group[DicomTag.NumberOfAnnotations]?.Value?.[0] as number,
 						dicomJson: group,
 						editable: false,
@@ -117,6 +158,7 @@ export function useAnnotationMap(server: DicomServer, slide: DicomJson | null) {
 				}
 
 				annotationMap[seriesUid] = {
+					editable: false,
 					referenceInstanceUid: getReferenceInstanceUid(annotation),
 					groupMap,
 				};
@@ -135,13 +177,19 @@ export function useAnnotationMap(server: DicomServer, slide: DicomJson | null) {
 	return [annotationMap, updateAnnotationMap] as const;
 }
 
+type AnnotationLayer = VectorLayer<Feature<Geometry>> | VectorImageLayer<Feature<Geometry>>;
+
 export function useAnnotationLayers(
 	mapRef: MutableRefObject<ol.Map | null>,
 	annotationMap: AnnotationMap,
 	updateAnnotationMap: (action: AnnotationMapAction) => void,
+	currentAnnotation: Annotation | null,
+	drawTypeState: [GraphicType | null, (drawType: GraphicType | null) => void],
 	resolutions: { [seriesUid: string]: number },
 ) {
-	const annotationLayersRef = useRef<(VectorLayer<Feature<Geometry>> | VectorImageLayer<Feature<Geometry>>)[]>([]);
+	const annotationLayersRef = useRef<AnnotationLayer[]>([]);
+	const drawInteractionRef = useRef<Interaction | null>(null);
+	const [drawType, setDrawType] = drawTypeState;
 
 	useEffect(() => {
 		const map = mapRef.current;
@@ -167,8 +215,10 @@ export function useAnnotationLayers(
 		// Remove layers that are no longer in the annotation map
 		for (const layer of annotationLayersRef.current) {
 			const { seriesUid, groupUid } = layer.getProperties();
-			if (!annotationMap[seriesUid].groupMap?.[groupUid]) {
+			if (!annotationMap[seriesUid]?.groupMap?.[groupUid]) {
+				layer.dispose();
 				mapRef.current.removeLayer(layer);
+				annotationLayersRef.current = annotationLayersRef.current.filter((l) => l !== layer);
 			}
 		}
 
@@ -215,6 +265,50 @@ export function useAnnotationLayers(
 			}
 		}
 	}, [mapRef, annotationMap, updateAnnotationMap, resolutions]);
+
+	// Create a draw interaction for the active annotation group
+	useEffect(() => {
+		const map = mapRef.current;
+
+		const activeLayer = annotationLayersRef.current.find((layer) => {
+			const { seriesUid, groupUid } = layer.getProperties();
+			return currentAnnotation?.seriesUid === seriesUid && currentAnnotation?.groupUid === groupUid;
+		});
+
+		if (!map || !activeLayer || !drawType) {
+			return;
+		}
+
+		// Remove any existing draw interaction
+		if (drawInteractionRef.current) {
+			map.removeInteraction(drawInteractionRef.current);
+		}
+
+		const olDrawTypes: Record<GraphicType, { type: Type; geometryFunction?: GeometryFunction }> = {
+			[GraphicType.Point]: { type: 'Point' },
+			[GraphicType.Polyline]: { type: 'LineString' },
+			[GraphicType.Polygon]: { type: 'Polygon' },
+			[GraphicType.Ellipse]: { type: 'Circle', geometryFunction: createEllipse() },
+			[GraphicType.Rectangle]: { type: 'Circle', geometryFunction: createBox() },
+		};
+
+		// Create a new draw interaction for freehand drawing
+		const drawInteraction = new Draw({
+			source: activeLayer.getSource() || undefined,
+			type: olDrawTypes[drawType].type,
+			geometryFunction: olDrawTypes[drawType].geometryFunction,
+			freehand: true,
+		});
+
+		map.addInteraction(drawInteraction);
+		drawInteractionRef.current = drawInteraction;
+
+		// Clean up the draw interaction when the component unmounts or activeLayer changes
+		return () => {
+			setDrawType(null);
+			map.removeInteraction(drawInteraction);
+		};
+	}, [mapRef, currentAnnotation, drawType, setDrawType]);
 }
 
 function fetchAnnotationGroups(server: DicomServer, slide: DicomJson | null): Promise<DicomJson[]> {
@@ -408,6 +502,33 @@ function calculateEllipsePoints(points: number[][]) {
 
 	return pointsOnEllipse;
 }
+
+const createEllipse = (): GeometryFunction => {
+	return (coordinates, geometry) => {
+		if (!geometry) {
+			geometry = new Polygon([]);
+		}
+
+		const [center, end] = coordinates as [number[], number[]];
+		const radiusX = Math.abs(end[0] - center[0]);
+		const radiusY = Math.abs(end[1] - center[1]);
+		const numPoints = 64;
+		const angleStep = (2 * Math.PI) / numPoints;
+		const ellipseCoords = [];
+
+		for (let i = 0; i < numPoints; i++) {
+			const angle = i * angleStep;
+			const x = center[0] + radiusX * Math.cos(angle);
+			const y = center[1] + radiusY * Math.sin(angle);
+			ellipseCoords.push([x, y]);
+		}
+
+		ellipseCoords.push(ellipseCoords[0]); // close the polygon
+
+		(geometry as Polygon).setCoordinates([ellipseCoords]);
+		return geometry;
+	};
+};
 
 /**
  * Extracts the referenced instance UID from the annotation group.

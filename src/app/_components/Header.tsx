@@ -33,7 +33,9 @@ export default function Header({ className, server, children }: Readonly<HeaderP
 		<header
 			className={`fixed inset-x-0 top-0 z-50 flex items-center gap-3 bg-green-500 px-3 shadow ${className || ''}`}
 		>
-			<AppTitle server={server} />
+			<div className="w-80">
+				<AppTitle server={server} />
+			</div>
 			<div className="grow">{children}</div>
 		</header>
 	);

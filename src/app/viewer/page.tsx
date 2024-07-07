@@ -1,9 +1,11 @@
 'use client';
 
+import type { Annotation, GraphicType } from './annotation';
 import { DicomJson, DicomTag } from '@/lib/dicom-web';
 import Drawer, { DrawerSection } from '@/app/_components/Drawer';
 import { useEffect, useMemo, useState } from 'react';
 import AnnotationList from './AnnotationList';
+import DrawActions from './DrawActions';
 import Header from '@/app/_components/Header';
 import Image from 'next/image';
 import PatientDescription from './PatientDescription';
@@ -12,7 +14,7 @@ import SlideViewer from './SlideViewer';
 import StudyDescription from './StudyDescription';
 import icon from '@/app/icon.png';
 import { servers } from '@/config/dicom-web';
-import { useAnnotationMap } from '@/app/viewer/annotation';
+import { useAnnotationMap } from './annotation';
 import { useSearchParams } from 'next/navigation';
 import { useStudy } from './study';
 
@@ -57,7 +59,14 @@ export default function ViewerPage() {
 	const { server, studyUid, seriesUid } = useOptions();
 	const [study, slides, loading] = useStudy(server, studyUid);
 	const [currentSlide, setCurrentSlide] = useState<DicomJson | null>(null);
-	const [annotationMap, updateAnnotationMap] = useAnnotationMap(server, currentSlide);
+	const [currentAnnotation, setCurrentAnnotation] = useState<Annotation | null>(null);
+	const [annotationMap, updateAnnotationMap] = useAnnotationMap(
+		server,
+		currentSlide,
+		currentAnnotation,
+		setCurrentAnnotation,
+	);
+	const [drawType, setDrawType] = useState<GraphicType | null>(null);
 	const loaderAnimation = useLoaderAnimation();
 	const notFound = useMemo(() => !loading && !study, [loading, study]);
 
@@ -69,7 +78,16 @@ export default function ViewerPage() {
 
 	return (
 		<>
-			<Header className="h-16" server={server} />
+			<Header className="h-16" server={server}>
+				<div className="flex justify-center pr-80">
+					<DrawActions
+						annotationMap={annotationMap}
+						currentAnnotationState={[currentAnnotation, setCurrentAnnotation]}
+						drawTypeState={[drawType, setDrawType]}
+						updateAnnotationMap={updateAnnotationMap}
+					/>
+				</div>
+			</Header>
 			<div className="flex h-full pt-16">
 				<Drawer placement="left">
 					<DrawerSection title="Patient" open>
@@ -98,7 +116,9 @@ export default function ViewerPage() {
 							server={server}
 							slide={currentSlide}
 							annotationMap={annotationMap}
+							currentAnnotation={currentAnnotation}
 							updateAnnotationMap={updateAnnotationMap}
+							drawTypeState={[drawType, setDrawType]}
 						/>
 					) : (
 						<p className="flex h-full items-center justify-center text-gray-500">No slide selected</p>
@@ -109,6 +129,8 @@ export default function ViewerPage() {
 						<AnnotationList
 							annotationMap={annotationMap}
 							updateAnnotationMap={updateAnnotationMap}
+							currentAnnotation={currentAnnotation}
+							setCurrentAnnotation={setCurrentAnnotation}
 							notFound={notFound}
 						/>
 					</DrawerSection>
