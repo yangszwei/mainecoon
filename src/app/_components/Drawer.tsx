@@ -117,23 +117,26 @@ export default function Drawer({ className, placement, children }: Readonly<Draw
 
 	return (
 		<aside ref={drawerRef} className={`relative h-full shrink-0 ${placementClass} ${className || ''}`}>
-			{isHidden ? (
-				<div className={`flex h-full flex-col justify-center bg-white ${placementClass}`} onMouseDown={handleMouseDown}>
-					<button type="button" onClick={toggleDrawer}>
-						<Icon icon={placement === 'right' ? mdiChevronLeft : mdiChevronRight} className="h-4 w-4" />
-					</button>
+			{/* Drawer handle */}
+			<div
+				className={`flex h-full flex-col justify-center bg-white ${isHidden ? '' : 'hidden'} ${placementClass}`}
+				onMouseDown={handleMouseDown}
+			>
+				<button type="button" onClick={toggleDrawer}>
+					<Icon icon={placement === 'right' ? mdiChevronLeft : mdiChevronRight} className="h-4 w-4" />
+				</button>
+			</div>
+
+			{/* Drawer content */}
+			<div className={isHidden ? 'hidden' : 'contents'}>
+				<div className="h-full overflow-auto bg-white shadow-sm" style={{ width }}>
+					{children}
 				</div>
-			) : (
-				<>
-					<div className="h-full overflow-auto bg-white shadow-sm" style={{ width }}>
-						{children}
-					</div>
-					<div
-						onMouseDown={handleMouseDown}
-						className={`absolute top-0 ${placement === 'right' ? '-left-1' : '-right-1'} h-full w-2 cursor-ew-resize`}
-					/>
-				</>
-			)}
+				<div
+					onMouseDown={handleMouseDown}
+					className={`absolute top-0 ${placement === 'right' ? '-left-1' : '-right-1'} h-full w-2 cursor-ew-resize`}
+				/>
+			</div>
 		</aside>
 	);
 }
