@@ -110,7 +110,7 @@ export interface DrawerProps {
 /** The drawer component (a.k.a. sidebar) provides access to secondary content. */
 export default function Drawer({ className, placement, children }: Readonly<DrawerProps>) {
 	const drawerRef = useRef(null);
-	const [isHidden, width, handleMouseDown, toggleDrawer] = useResize(placement, [320, 288, 352], 16);
+	const [isHidden, width, handleMouseDown, toggleDrawer] = useResize(placement, [318, 270, 510], 16);
 
 	// Default placement is 'left'.
 	const placementClass = placement === 'right' ? 'border-l' : 'border-r';
