@@ -1,0 +1,9 @@
+services:
+  mainecoon:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    ports:
+      - '${PORT:-3000}:3000'
