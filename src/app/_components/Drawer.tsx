@@ -1,12 +1,11 @@
 'use client';
 
 import type { MouseEvent, ReactNode } from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
 import mdiChevronDown from '@iconify-icons/mdi/chevron-down';
 import mdiChevronLeft from '@iconify-icons/mdi/chevron-left';
 import mdiChevronRight from '@iconify-icons/mdi/chevron-right';
-import { useState } from 'react';
 
 export interface DrawerSectionProps {
 	title: string;
@@ -109,14 +108,13 @@ export interface DrawerProps {
 
 /** The drawer component (a.k.a. sidebar) provides access to secondary content. */
 export default function Drawer({ className, placement, children }: Readonly<DrawerProps>) {
-	const drawerRef = useRef(null);
 	const [isHidden, width, handleMouseDown, toggleDrawer] = useResize(placement, [318, 270, 510], 16);
 
 	// Default placement is 'left'.
 	const placementClass = placement === 'right' ? 'border-l' : 'border-r';
 
 	return (
-		<aside ref={drawerRef} className={`relative h-full shrink-0 ${placementClass} ${className || ''}`}>
+		<aside className={`relative h-full shrink-0 ${placementClass} ${className || ''}`}>
 			{/* Drawer handle */}
 			<div
 				className={`flex h-full flex-col justify-center bg-white ${isHidden ? '' : 'hidden'} ${placementClass}`}
