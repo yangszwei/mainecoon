@@ -60,6 +60,7 @@ export function useAnnotationMap(
 	slide: DicomJson | null,
 	currentAnnotation: Annotation | null,
 	setCurrentAnnotation: (annotation: Annotation | null) => void,
+	setDrawType: (graphicType: GraphicType | null) => void,
 ) {
 	const [annotationMap, updateAnnotationMap] = useImmerReducer(reducer, {} as AnnotationMap);
 
@@ -82,6 +83,7 @@ export function useAnnotationMap(
 
 				annotationMap[seriesUid].groupMap[groupUid] = annotation;
 				setCurrentAnnotation(annotation);
+				setDrawType(annotation.graphicType);
 
 				return annotationMap;
 
@@ -172,7 +174,7 @@ export function useAnnotationMap(
 		return () => {
 			updateAnnotationMap({ type: 'reset', annotationMap: {} });
 		};
-	}, [server, slide, updateAnnotationMap]);
+	}, [server, setDrawType, slide, updateAnnotationMap]);
 
 	return [annotationMap, updateAnnotationMap] as const;
 }
@@ -305,7 +307,6 @@ export function useAnnotationLayers(
 
 		// Clean up the draw interaction when the component unmounts or activeLayer changes
 		return () => {
-			setDrawType(null);
 			map.removeInteraction(drawInteraction);
 		};
 	}, [mapRef, currentAnnotation, drawType, setDrawType]);

@@ -2,8 +2,8 @@ import type { Annotation, AnnotationMap, AnnotationMapAction } from './annotatio
 import GeometryPicker from './GeometryPicker';
 import { GraphicType } from './annotation';
 import { Icon } from '@iconify/react';
+import mdiHand from '@iconify-icons/mdi/hand';
 import mdiPencil from '@iconify-icons/mdi/pencil';
-import mdiPencilOff from '@iconify-icons/mdi/pencil-off';
 import { useEffect } from 'react';
 
 export interface GeometryPickerProps {
@@ -29,6 +29,7 @@ export default function DrawActions({
 			const group = Object.values(annotationMap[seriesUid].groupMap).findLast((g) => g.graphicType === graphicType);
 			if (group) {
 				setCurrentAnnotation(group);
+				setDrawType(graphicType);
 				return;
 			}
 		}
@@ -68,7 +69,7 @@ export default function DrawActions({
 					className="rounded bg-white/80 p-1.5"
 					onClick={() => setDrawType(drawType ? null : currentAnnotation?.graphicType || null)}
 				>
-					<Icon icon={drawType === null ? mdiPencil : mdiPencilOff} className="h-5 w-5" />
+					<Icon icon={drawType === null ? mdiPencil : mdiHand} className="h-5 w-5" />
 				</button>
 			)}
 			<GeometryPicker className="contents" onPick={createAnnotationGroup} />

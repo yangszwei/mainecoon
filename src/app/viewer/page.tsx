@@ -60,13 +60,14 @@ export default function ViewerPage() {
 	const [study, slides, loading] = useStudy(server, studyUid);
 	const [currentSlide, setCurrentSlide] = useState<DicomJson | null>(null);
 	const [currentAnnotation, setCurrentAnnotation] = useState<Annotation | null>(null);
+	const [drawType, setDrawType] = useState<GraphicType | null>(null);
 	const [annotationMap, updateAnnotationMap] = useAnnotationMap(
 		server,
 		currentSlide,
 		currentAnnotation,
 		setCurrentAnnotation,
+		setDrawType,
 	);
-	const [drawType, setDrawType] = useState<GraphicType | null>(null);
 	const loaderAnimation = useLoaderAnimation();
 	const notFound = useMemo(() => !loading && !study, [loading, study]);
 
