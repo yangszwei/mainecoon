@@ -352,7 +352,8 @@ async function fetchAnnotationSource(group: Annotation, source: VectorSource | n
 			// Fetch the bulk data URI
 			const response = await fetch(pointCoordinatesData.BulkDataURI);
 			const bulkData = multipartDecode(await response.arrayBuffer());
-			points = decodeValue(pointCoordinatesData.vr, bulkData) as Float64Array | Float32Array;
+			const vr = pointCoordinatesData.vr === 'UR' ? 'OF' : pointCoordinatesData.vr;
+			points = decodeValue(vr, bulkData) as Float64Array | Float32Array;
 		}
 	}
 
@@ -365,7 +366,8 @@ async function fetchAnnotationSource(group: Annotation, source: VectorSource | n
 			// Fetch the bulk data URI
 			const response = await fetch(pointIndexList.BulkDataURI);
 			const bulkData = multipartDecode(await response.arrayBuffer());
-			indexes = decodeValue(pointIndexList.vr, bulkData) as Uint32Array;
+			const vr = pointIndexList.vr === 'UR' ? 'OL' : pointIndexList.vr;
+			indexes = decodeValue(vr, bulkData) as Uint32Array;
 		}
 	}
 
