@@ -54,6 +54,7 @@ interface AnnotationGroupListProps {
 	updateAnnotationMap: (action: AnnotationMapAction) => void;
 	currentAnnotation: Annotation | null;
 	setCurrentAnnotation: (annotation: Annotation | null) => void;
+	setDrawType: (drawType: GraphicType | null) => void;
 }
 
 function AnnotationGroupList({
@@ -63,6 +64,7 @@ function AnnotationGroupList({
 	updateAnnotationMap,
 	currentAnnotation,
 	setCurrentAnnotation,
+	setDrawType,
 }: Readonly<AnnotationGroupListProps>) {
 	const [open, setOpen] = useState(series.editable);
 	const [showGeometryPicker, setShowGeometryPicker] = useState(false);
@@ -83,6 +85,7 @@ function AnnotationGroupList({
 		}
 
 		setCurrentAnnotation(group);
+		setDrawType(group.graphicType);
 		updateAnnotationMap({ type: 'update', seriesUid, groupUid: group.groupUid, annotation: { visible: true } });
 	}
 
@@ -215,6 +218,7 @@ export interface AnnotationListProps {
 	updateAnnotationMap: (action: AnnotationMapAction) => void;
 	currentAnnotation: Annotation | null;
 	setCurrentAnnotation: (annotation: Annotation | null) => void;
+	setDrawType: (drawType: GraphicType | null) => void;
 	loading: boolean;
 }
 
@@ -223,6 +227,7 @@ export default function AnnotationList({
 	updateAnnotationMap,
 	currentAnnotation,
 	setCurrentAnnotation,
+	setDrawType,
 	loading,
 }: Readonly<AnnotationListProps>) {
 	const [showGeometryPicker, setShowGeometryPicker] = useState(false);
@@ -259,6 +264,7 @@ export default function AnnotationList({
 							updateAnnotationMap={updateAnnotationMap}
 							currentAnnotation={currentAnnotation}
 							setCurrentAnnotation={setCurrentAnnotation}
+							setDrawType={setDrawType}
 						/>
 					);
 				})

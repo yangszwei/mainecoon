@@ -133,6 +133,7 @@ export default function ViewerPage() {
 							updateAnnotationMap={updateAnnotationMap}
 							currentAnnotation={currentAnnotation}
 							setCurrentAnnotation={setCurrentAnnotation}
+							setDrawType={setDrawType}
 							loading={loading}
 						/>
 					</DrawerSection>
