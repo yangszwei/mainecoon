@@ -25,6 +25,7 @@ export enum DicomTag {
 	ContainerIdentifier = '00400512',
 	TotalPixelMatrixColumns = '00480006',
 	TotalPixelMatrixRows = '00480007',
+	RecommendedDisplayCIELabValue = '0062000D',
 	PointCoordinatesData = '00660016',
 	LongPrimitivePointIndexList = '00660040',
 	AnnotationGroupSequence = '006A0002',

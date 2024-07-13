@@ -1,5 +1,6 @@
 import type * as ol from 'ol';
 import { $dicom, DicomTag } from '@/lib/dicom-web';
+import { Circle, Fill, Stroke, Style } from 'ol/style';
 import { Draw, Interaction } from 'ol/interaction';
 import { Geometry, MultiLineString, MultiPoint, MultiPolygon, Polygon } from 'ol/geom';
 import { useEffect, useRef } from 'react';
@@ -12,12 +13,16 @@ import type { Type } from 'ol/geom/Geometry';
 import VectorImageLayer from 'ol/layer/VectorImage';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
+import convert from 'color-convert';
 import { createBox } from 'ol/interaction/Draw';
 import { decodeValue } from '@/lib/dicom-web/vr';
 import { fetchDicomJson } from '@/lib/dicom-web';
 import { imageLayerThreshold } from '@/lib/constants';
 import { multipartDecode } from '@/lib/utils/multipart';
 import { useImmerReducer } from 'use-immer';
+
+/** Default color for annotations. */
+export const defaultColor = '#3399CC';
 
 export enum GraphicType {
 	Point = 'POINT',
@@ -68,8 +73,10 @@ export function useAnnotationMap(
 		switch (action.type) {
 			// Create a new annotation group, optionally create a new series if none is specified.
 			case 'create':
-				const seriesUid = action.seriesUid || `draft-series-${self.crypto.randomUUID()}`;
-				const groupUid = `draft-group-${self.crypto.randomUUID()}`;
+				// `crypto.randomUUID()` is only available in secure contexts, so we use `Math.random()` as a fallback
+				const randomUUID = (() => crypto.randomUUID()) || (() => Math.random().toString(36).substring(2));
+				const seriesUid = action.seriesUid || `draft-series-${randomUUID()}`;
+				const groupUid = `draft-group-${randomUUID()}`;
 				annotationMap[seriesUid] ||= { editable: true, groupMap: {} };
 				const annotation: Annotation = {
 					...action.annotation,
@@ -89,10 +96,16 @@ export function useAnnotationMap(
 
 			// Update an annotation group.
 			case 'update':
-				annotationMap[action.seriesUid].groupMap[action.groupUid] = {
+				const updatedAnnotation = {
 					...annotationMap[action.seriesUid].groupMap[action.groupUid],
 					...action.annotation,
 				};
+				// Update the annotation in the map
+				annotationMap[action.seriesUid].groupMap[action.groupUid] = updatedAnnotation;
+				// Update the current annotation if it's being updated
+				if (currentAnnotation?.seriesUid === action.seriesUid && currentAnnotation?.groupUid === action.groupUid) {
+					setCurrentAnnotation(updatedAnnotation);
+				}
 				return annotationMap;
 
 			// Delete an annotation group, or the entire series if no group is specified. If no group is left after deletion, the series is also deleted.
@@ -150,7 +163,7 @@ export function useAnnotationMap(
 						groupUid,
 						name: $dicom(group, DicomTag.AnnotationGroupLabel),
 						status: 'initialized',
-						color: '',
+						color: getRecommendedColor(group[DicomTag.RecommendedDisplayCIELabValue]?.Value?.[0] as never),
 						graphicType: group[DicomTag.GraphicType]?.Value?.[0] as GraphicType,
 						numberOfAnnotations: group[DicomTag.NumberOfAnnotations]?.Value?.[0] as number,
 						dicomJson: group,
@@ -239,11 +252,13 @@ export function useAnnotationLayers(
 							source: new VectorSource({ wrapX: false }),
 							imageRatio: Object.keys(resolutions).length / 2,
 							properties: { groupUid, seriesUid },
+							style: createStyle(group.color),
 						});
 					} else {
 						layer = new VectorLayer({
 							source: new VectorSource({ wrapX: false }),
 							properties: { groupUid, seriesUid },
+							style: createStyle(group.color),
 						});
 					}
 
@@ -263,6 +278,10 @@ export function useAnnotationLayers(
 						.catch(() => updateAnnotationMap({ type: 'update', seriesUid, groupUid, annotation: { status: 'error' } }));
 				}
 
+				// Update the layer color
+				layer.setStyle(createStyle(group.color));
+
+				// Update the layer visibility
 				layer.setVisible(group.visible);
 			}
 		}
@@ -277,7 +296,7 @@ export function useAnnotationLayers(
 			return currentAnnotation?.seriesUid === seriesUid && currentAnnotation?.groupUid === groupUid;
 		});
 
-		if (!map || !activeLayer || !drawType) {
+		if (!map || !currentAnnotation || !activeLayer || !drawType) {
 			return;
 		}
 
@@ -300,6 +319,7 @@ export function useAnnotationLayers(
 			type: olDrawTypes[drawType].type,
 			geometryFunction: olDrawTypes[drawType].geometryFunction,
 			freehand: true,
+			style: createDrawingStyle(currentAnnotation.color),
 		});
 
 		map.addInteraction(drawInteraction);
@@ -543,4 +563,44 @@ function getReferenceInstanceUid(group: DicomJson) {
 	const referenceSeries = group[DicomTag.ReferencedSeriesSequence]?.Value?.[0] as DicomJson;
 	const referencedInstance = referenceSeries?.[DicomTag.ReferencedInstanceSequence]?.Value?.[0] as DicomJson;
 	return referencedInstance?.[DicomTag.ReferencedSOPInstanceUID]!.Value?.[0] as string | undefined;
+}
+
+/**
+ * Gets the recommended color for the annotation group.
+ *
+ * @param color The CIELab color to convert to hex.
+ * @returns The recommended color in hex format.
+ */
+function getRecommendedColor(color: [number, number, number]) {
+	const hex = color && convert.lab.hex(color);
+	return hex ? `#${hex}` : defaultColor;
+}
+
+/**
+ * Creates the feature style for the annotation group layer.
+ *
+ * @param color The color to use for the feature style.
+ * @returns The OpenLayers style object.
+ */
+function createStyle(color: string) {
+	const fill = new Fill({ color: 'rgba(255,255,255,0.4)' });
+	const stroke = new Stroke({ color, width: 1.25 });
+	const circle = new Circle({ fill, stroke, radius: 5 });
+	return new Style({ image: circle, fill, stroke });
+}
+
+/**
+ * Creates the drawing style for the annotation group layer.
+ *
+ * @param color The color to use for the drawing style.
+ * @returns The OpenLayers style object.
+ */
+function createDrawingStyle(color: string) {
+	return {
+		'circle-radius': 5,
+		'circle-fill-color': color,
+		'stroke-color': color,
+		'stroke-width': 2,
+		'fill-color': 'rgba(255,255,255,0.4)',
+	};
 }

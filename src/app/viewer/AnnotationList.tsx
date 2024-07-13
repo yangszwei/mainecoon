@@ -4,6 +4,7 @@ import GeometryPicker from './GeometryPicker';
 import { GraphicType } from './annotation';
 import { Icon } from '@iconify/react';
 import type React from 'react';
+import { defaultColor } from './annotation';
 import mdiChevronDown from '@iconify-icons/mdi/chevron-down';
 import mdiCloseThick from '@iconify-icons/mdi/close-thick';
 import mdiDelete from '@iconify-icons/mdi/delete';
@@ -20,20 +21,28 @@ function ErrorIndicator() {
 }
 
 function AnnotationGroupItem({ annotation }: Readonly<{ annotation: Annotation }>) {
-	const fields = [
-		{ name: 'Label', value: annotation.name },
-		{ name: 'Graphic Type', value: annotation.graphicType },
-		{ name: 'Count', value: annotation.numberOfAnnotations.toLocaleString() },
-	];
+	/** This component displays the value of an DICOM attribute */
+	function Attribute({ name, value }: Readonly<{ name: string; value: string }>) {
+		return (
+			<p>
+				<span className="after:pl-0.5 after:pr-1.5 after:content-[':']">{name}</span>
+				<strong className="inline">{value}</strong>
+			</p>
+		);
+	}
 
 	return (
 		<ul className="grow space-y-0.5 p-3 text-sm">
-			{fields.map(({ name, value }) => (
-				<li key={name}>
-					<span className="after:pl-0.5 after:pr-1.5 after:content-[':']">{name}</span>
-					<strong className="inline">{value}</strong>
-				</li>
-			))}
+			<li className="flex items-center gap-1.5">
+				<Attribute name="Label" value={annotation.name} />
+				<span className="block h-3 w-3 rounded-full border" style={{ backgroundColor: annotation.color }} />
+			</li>
+			<li>
+				<Attribute name="Graphic Type" value={annotation.graphicType} />
+			</li>
+			<li>
+				<Attribute name="Count" value={annotation.numberOfAnnotations.toLocaleString()} />
+			</li>
 		</ul>
 	);
 }
@@ -86,7 +95,7 @@ function AnnotationGroupList({
 		updateAnnotationMap({
 			type: 'create',
 			seriesUid,
-			annotation: { name: 'Untitled Annotation', color: '#000000', graphicType },
+			annotation: { name: 'Untitled Annotation', color: defaultColor, graphicType },
 		});
 	}
 
@@ -233,7 +242,7 @@ export default function AnnotationList({
 		setShowGeometryPicker(false);
 		updateAnnotationMap({
 			type: 'create',
-			annotation: { name: 'Untitled Annotation', color: '#000000', graphicType },
+			annotation: { name: 'Untitled Annotation', color: defaultColor, graphicType },
 		});
 	}
 

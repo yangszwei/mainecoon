@@ -1,7 +1,9 @@
 import type { Annotation, AnnotationMap, AnnotationMapAction } from './annotation';
+import ColorPicker from './ColorPicker';
 import GeometryPicker from './GeometryPicker';
 import { GraphicType } from './annotation';
 import { Icon } from '@iconify/react';
+import { defaultColor } from './annotation';
 import mdiHand from '@iconify-icons/mdi/hand';
 import mdiPencil from '@iconify-icons/mdi/pencil';
 import { useEffect } from 'react';
@@ -39,7 +41,18 @@ export default function DrawActions({
 		updateAnnotationMap({
 			type: 'create',
 			seriesUid: currentAnnotation?.seriesUid || undefined,
-			annotation: { name: 'Untitled Annotation', color: '#000000', graphicType },
+			annotation: { name: 'Untitled Annotation', color: defaultColor, graphicType },
+		});
+	}
+
+	function updateCurrentColor(color: string) {
+		if (!currentAnnotation) return;
+
+		updateAnnotationMap({
+			type: 'update',
+			seriesUid: currentAnnotation.seriesUid,
+			groupUid: currentAnnotation.groupUid,
+			annotation: { color },
 		});
 	}
 
@@ -73,6 +86,7 @@ export default function DrawActions({
 				</button>
 			)}
 			<GeometryPicker className="contents" onPick={createAnnotationGroup} />
+			{currentAnnotation && <ColorPicker setValue={updateCurrentColor} value={currentAnnotation.color} />}
 		</div>
 	);
 }
