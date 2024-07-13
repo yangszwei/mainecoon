@@ -210,7 +210,7 @@ export function useAnnotationLayers(
 	}, [mapRef, updateAnnotationMap]);
 
 	useEffect(() => {
-		if (!mapRef.current || !Object.keys(annotationMap).length || !Object.keys(resolutions).length) {
+		if (!mapRef.current || !annotationMap || !Object.keys(resolutions).length) {
 			return;
 		}
 

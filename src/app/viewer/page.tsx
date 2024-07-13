@@ -86,6 +86,7 @@ export default function ViewerPage() {
 						currentAnnotationState={[currentAnnotation, setCurrentAnnotation]}
 						drawTypeState={[drawType, setDrawType]}
 						updateAnnotationMap={updateAnnotationMap}
+						loading={loading}
 					/>
 				</div>
 			</Header>
@@ -132,7 +133,7 @@ export default function ViewerPage() {
 							updateAnnotationMap={updateAnnotationMap}
 							currentAnnotation={currentAnnotation}
 							setCurrentAnnotation={setCurrentAnnotation}
-							notFound={notFound}
+							loading={loading}
 						/>
 					</DrawerSection>
 				</Drawer>

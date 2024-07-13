@@ -10,6 +10,15 @@ import mdiDelete from '@iconify-icons/mdi/delete';
 import mdiPlus from '@iconify-icons/mdi/plus';
 import { useState } from 'react';
 
+function ErrorIndicator() {
+	return (
+		<div className="relative">
+			<div className="spinner-sm border-transparent" />
+			<Icon icon={mdiCloseThick} className="absolute inset-0 -left-0.5 h-5 w-5 text-red-500" />
+		</div>
+	);
+}
+
 function AnnotationGroupItem({ annotation }: Readonly<{ annotation: Annotation }>) {
 	const fields = [
 		{ name: 'Label', value: annotation.name },
@@ -49,7 +58,6 @@ function AnnotationGroupList({
 	const [open, setOpen] = useState(series.editable);
 	const [showGeometryPicker, setShowGeometryPicker] = useState(false);
 	const popoverRef = useRef<HTMLDivElement | null>(null);
-	const isOpen = open;
 
 	useClickOutside(popoverRef, () => setShowGeometryPicker(false));
 
@@ -95,6 +103,8 @@ function AnnotationGroupList({
 						(group) => group.status === 'initialized' || group.status === 'loading',
 					) ? (
 						<div className="spinner-sm border-green-500" />
+					) : Object.values(series.groupMap).every((g) => g.status === 'error') ? (
+						<ErrorIndicator />
 					) : (
 						<input
 							type="checkbox"
@@ -136,12 +146,12 @@ function AnnotationGroupList({
 						)}
 						<Icon
 							icon={mdiChevronDown}
-							className={`inline-block h-5 w-5 transition-transform ${isOpen ? 'rotate-180' : 'rotate-0'}`}
+							className={`inline-block h-5 w-5 transition-transform ${open ? 'rotate-180' : 'rotate-0'}`}
 						/>
 					</div>
 				</div>
 			</div>
-			<ul className={isOpen ? 'block' : 'hidden'}>
+			<ul className={open ? 'block' : 'hidden'}>
 				{Object.entries(series.groupMap).map(([groupUid, group], index) => {
 					return (
 						<li
@@ -153,10 +163,7 @@ function AnnotationGroupList({
 								{group.status === 'initialized' || group.status === 'loading' ? (
 									<div className="spinner-sm border-green-500" />
 								) : group.status === 'error' ? (
-									<div className="relative">
-										<div className="spinner-sm border-transparent" />
-										<Icon icon={mdiCloseThick} className="absolute inset-0 -left-0.5 h-5 w-5 text-red-500" />
-									</div>
+									<ErrorIndicator />
 								) : (
 									<input
 										type="checkbox"
@@ -199,7 +206,7 @@ export interface AnnotationListProps {
 	updateAnnotationMap: (action: AnnotationMapAction) => void;
 	currentAnnotation: Annotation | null;
 	setCurrentAnnotation: (annotation: Annotation | null) => void;
-	notFound: boolean;
+	loading: boolean;
 }
 
 export default function AnnotationList({
@@ -207,23 +214,19 @@ export default function AnnotationList({
 	updateAnnotationMap,
 	currentAnnotation,
 	setCurrentAnnotation,
-	notFound,
+	loading,
 }: Readonly<AnnotationListProps>) {
 	const [showGeometryPicker, setShowGeometryPicker] = useState(false);
 	const popoverRef = useRef<HTMLDivElement | null>(null);
 
 	useClickOutside(popoverRef, () => setShowGeometryPicker(false));
 
-	if (annotationMap.loading && !notFound) {
+	if (loading) {
 		return (
 			<p className="p-3 text-center">
 				<span className="spinner-sm border-green-500" />
 			</p>
 		);
-	}
-
-	if (Object.keys(annotationMap).length === 0 || notFound) {
-		return <p className="p-3.5 text-center text-sm tracking-wide text-gray-500">No annotations available</p>;
 	}
 
 	function createSeries(graphicType: GraphicType) {
@@ -236,23 +239,27 @@ export default function AnnotationList({
 
 	return (
 		<ul>
-			{Object.entries(annotationMap).map(([seriesUid, series], index) => {
-				return (
-					<AnnotationGroupList
-						key={seriesUid}
-						index={index}
-						seriesUid={seriesUid}
-						series={series}
-						updateAnnotationMap={updateAnnotationMap}
-						currentAnnotation={currentAnnotation}
-						setCurrentAnnotation={setCurrentAnnotation}
-					/>
-				);
-			})}
+			{Object.keys(annotationMap).length > 0 ? (
+				Object.entries(annotationMap).map(([seriesUid, series], index) => {
+					return (
+						<AnnotationGroupList
+							key={seriesUid}
+							index={index}
+							seriesUid={seriesUid}
+							series={series}
+							updateAnnotationMap={updateAnnotationMap}
+							currentAnnotation={currentAnnotation}
+							setCurrentAnnotation={setCurrentAnnotation}
+						/>
+					);
+				})
+			) : (
+				<p className="mt-1 p-3 text-center text-sm tracking-wide text-gray-500">No annotations available</p>
+			)}
 			<li className="relative flex justify-center">
 				<button
 					type="button"
-					className="mx-auto mt-3 block rounded bg-green-500 px-2 py-1 text-center text-xs text-white"
+					className="mx-auto my-3 block rounded bg-green-500 px-2 py-1 text-center text-xs text-white"
 					onClick={() => setShowGeometryPicker(true)}
 				>
 					Create Series

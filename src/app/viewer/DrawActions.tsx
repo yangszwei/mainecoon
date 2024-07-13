@@ -6,11 +6,12 @@ import mdiHand from '@iconify-icons/mdi/hand';
 import mdiPencil from '@iconify-icons/mdi/pencil';
 import { useEffect } from 'react';
 
-export interface GeometryPickerProps {
+export interface DrawActionsProps {
 	annotationMap: AnnotationMap;
 	currentAnnotationState: [Annotation | null, (annotation: Annotation | null) => void];
 	drawTypeState: [GraphicType | null, (drawType: GraphicType | null) => void];
 	updateAnnotationMap: (action: AnnotationMapAction) => void;
+	loading: boolean;
 }
 
 export default function DrawActions({
@@ -18,7 +19,8 @@ export default function DrawActions({
 	currentAnnotationState,
 	drawTypeState,
 	updateAnnotationMap,
-}: Readonly<GeometryPickerProps>) {
+	loading,
+}: Readonly<DrawActionsProps>) {
 	const [currentAnnotation, setCurrentAnnotation] = currentAnnotationState;
 	const [drawType, setDrawType] = drawTypeState;
 
@@ -56,10 +58,8 @@ export default function DrawActions({
 		};
 	}, [currentAnnotation, drawType, setDrawType]);
 
-	// todo: hide the geometry picker during loading
-	if (!Object.keys(annotationMap).length) {
-		return null;
-	}
+	// Hide the geometry picker during loading
+	if (loading) return null;
 
 	return (
 		<div className="flex items-center gap-3">
