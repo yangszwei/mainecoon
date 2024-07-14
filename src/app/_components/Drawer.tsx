@@ -1,6 +1,6 @@
 'use client';
 
-import type { MouseEvent, ReactNode } from 'react';
+import type { MouseEvent, ReactNode, TouchEvent } from 'react';
 import { useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
 import mdiChevronDown from '@iconify-icons/mdi/chevron-down';
@@ -43,10 +43,10 @@ function useResize(placement: 'left' | 'right' | undefined, widths: number[], hi
 	const [isHidden, setIsHidden] = useState(false);
 
 	useEffect(() => {
-		const handleMouseMove = (e: MouseEvent) => {
+		const handleMove = (clientX: number) => {
 			if (!isResizing) return;
 
-			let newWidth = placement === 'right' ? window.innerWidth - e.clientX : e.clientX;
+			let newWidth = placement === 'right' ? window.innerWidth - clientX : clientX;
 
 			// Snap to default width if close enough
 			if (Math.abs(newWidth - defaultWidth) < 5) {
@@ -63,26 +63,37 @@ function useResize(placement: 'left' | 'right' | undefined, widths: number[], hi
 			}
 		};
 
-		const handleMouseUp = () => {
+		const handleMouseMove = (e: MouseEvent) => handleMove(e.clientX);
+		const handleTouchMove = (e: TouchEvent) => handleMove(e.touches[0].clientX);
+
+		const handleEnd = () => {
 			setIsResizing(false);
 			document.documentElement.style.cursor = '';
+			document.body.classList.remove('select-none');
 			document.removeEventListener('mousemove', handleMouseMove as never);
-			document.removeEventListener('mouseup', handleMouseUp);
+			document.removeEventListener('mouseup', handleEnd);
+			document.removeEventListener('touchmove', handleTouchMove as never);
+			document.removeEventListener('touchend', handleEnd);
 		};
 
 		if (isResizing) {
 			document.documentElement.style.cursor = 'ew-resize';
+			document.body.classList.add('select-none');
 			document.addEventListener('mousemove', handleMouseMove as never);
-			document.addEventListener('mouseup', handleMouseUp);
+			document.addEventListener('mouseup', handleEnd);
+			document.addEventListener('touchmove', handleTouchMove as never);
+			document.addEventListener('touchend', handleEnd);
 		}
 
 		return () => {
 			document.removeEventListener('mousemove', handleMouseMove as never);
-			document.removeEventListener('mouseup', handleMouseUp);
+			document.removeEventListener('mouseup', handleEnd);
+			document.removeEventListener('touchmove', handleTouchMove as never);
+			document.removeEventListener('touchend', handleEnd);
 		};
 	}, [isResizing, placement, defaultWidth, minWidth, maxWidth, hideThreshold]);
 
-	const handleMouseDown = (e: MouseEvent) => {
+	const handleStart = (e: MouseEvent | TouchEvent) => {
 		e.preventDefault();
 		setIsResizing(true);
 	};
@@ -97,7 +108,7 @@ function useResize(placement: 'left' | 'right' | undefined, widths: number[], hi
 		}
 	};
 
-	return [isHidden, width, handleMouseDown, toggleDrawer] as const;
+	return [isHidden, width, handleStart, toggleDrawer] as const;
 }
 
 export interface DrawerProps {
@@ -108,7 +119,7 @@ export interface DrawerProps {
 
 /** The drawer component (a.k.a. sidebar) provides access to secondary content. */
 export default function Drawer({ className, placement, children }: Readonly<DrawerProps>) {
-	const [isHidden, width, handleMouseDown, toggleDrawer] = useResize(placement, [318, 270, 510], 16);
+	const [isHidden, width, handleStart, toggleDrawer] = useResize(placement, [318, 270, 510], 16);
 
 	// Default placement is 'left'.
 	const placementClass = placement === 'right' ? 'border-l' : 'border-r';
@@ -118,7 +129,8 @@ export default function Drawer({ className, placement, children }: Readonly<Draw
 			{/* Drawer handle */}
 			<div
 				className={`flex h-full flex-col justify-center bg-white ${isHidden ? '' : 'hidden'} ${placementClass}`}
-				onMouseDown={handleMouseDown}
+				onMouseDown={handleStart}
+				onTouchStart={handleStart}
 			>
 				<button type="button" onClick={toggleDrawer}>
 					<Icon icon={placement === 'right' ? mdiChevronLeft : mdiChevronRight} className="h-4 w-4" />
@@ -131,7 +143,8 @@ export default function Drawer({ className, placement, children }: Readonly<Draw
 					{children}
 				</div>
 				<div
-					onMouseDown={handleMouseDown}
+					onMouseDown={handleStart}
+					onTouchStart={handleStart}
 					className={`absolute top-0 ${placement === 'right' ? '-left-1' : '-right-1'} h-full w-2 cursor-ew-resize`}
 				/>
 			</div>
