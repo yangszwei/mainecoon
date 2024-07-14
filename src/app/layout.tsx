@@ -4,10 +4,12 @@ import './globals.css';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Suspense } from 'react';
+import { basePath } from '@/lib/constants';
 
 export const metadata: Metadata = {
 	title: 'Mainecoon',
 	description: 'Web-based Digital Pathology Viewer',
+	manifest: `${basePath}/manifest.webmanifest`,
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
