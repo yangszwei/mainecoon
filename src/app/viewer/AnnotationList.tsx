@@ -1,10 +1,9 @@
-import type { Annotation, AnnotationMap, AnnotationMapAction } from './annotation';
+import type { Annotation, AnnotationMap, AnnotationMapAction } from './_hooks/annotation';
+import { GraphicType, defaultColor } from './_hooks/annotation';
 import { useEffect, useRef } from 'react';
 import GeometryPicker from './GeometryPicker';
-import { GraphicType } from './annotation';
 import { Icon } from '@iconify/react';
 import type React from 'react';
-import { defaultColor } from './annotation';
 import mdiChevronDown from '@iconify-icons/mdi/chevron-down';
 import mdiCloseThick from '@iconify-icons/mdi/close-thick';
 import mdiDelete from '@iconify-icons/mdi/delete';

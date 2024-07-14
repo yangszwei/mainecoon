@@ -1,9 +1,8 @@
-import type { Annotation, AnnotationMap, AnnotationMapAction } from './annotation';
+import type { Annotation, AnnotationMap, AnnotationMapAction, GraphicType } from './_hooks/annotation';
 import ColorPicker from './ColorPicker';
 import GeometryPicker from './GeometryPicker';
-import { GraphicType } from './annotation';
 import { Icon } from '@iconify/react';
-import { defaultColor } from './annotation';
+import { defaultColor } from './_hooks/annotation';
 import mdiHand from '@iconify-icons/mdi/hand';
 import mdiPencil from '@iconify-icons/mdi/pencil';
 import { useEffect } from 'react';

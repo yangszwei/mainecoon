@@ -1,6 +1,6 @@
 'use client';
 
-import type { Annotation, GraphicType } from './annotation';
+import type { Annotation, GraphicType } from './_hooks/annotation';
 import { DicomJson, DicomTag } from '@/lib/dicom-web';
 import Drawer, { DrawerSection } from '@/app/_components/Drawer';
 import { useEffect, useMemo, useState } from 'react';
@@ -14,9 +14,9 @@ import SlideViewer from './SlideViewer';
 import StudyDescription from './StudyDescription';
 import icon from '@/app/icon.png';
 import { servers } from '@/config/dicom-web';
-import { useAnnotationMap } from './annotation';
+import { useAnnotationMap } from './_hooks/annotation';
 import { useSearchParams } from 'next/navigation';
-import { useStudy } from './study';
+import { useStudy } from './_hooks/study';
 
 /**
  * Builds a valid options object based on the search parameters for the viewer page.

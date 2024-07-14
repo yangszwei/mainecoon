@@ -1,11 +1,11 @@
 'use client';
 
 import 'ol/ol.css';
-import type { Annotation, AnnotationMap, AnnotationMapAction } from './annotation';
-import { GraphicType, useAnnotationLayers } from './annotation';
+import type { Annotation, AnnotationMap, AnnotationMapAction, GraphicType } from './_hooks/annotation';
 import type { DicomJson } from '@/lib/dicom-web';
 import type { DicomServer } from '@/config/dicom-web';
-import { useMap } from './map';
+import { useAnnotationLayers } from './_hooks/annotation/layer';
+import { useMap } from './_hooks/map';
 
 /** The props for the SlideViewer component. */
 export interface SlideViewerProps {

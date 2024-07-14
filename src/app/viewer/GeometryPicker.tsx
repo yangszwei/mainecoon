@@ -1,4 +1,4 @@
-import { GraphicType } from './annotation';
+import { GraphicType } from './_hooks/annotation';
 import { Icon } from '@iconify/react';
 import type { MouseEvent } from 'react';
 import mdiEllipseOutline from '@iconify-icons/mdi/ellipse-outline';
