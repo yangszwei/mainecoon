@@ -74,9 +74,9 @@ export function useAnnotationMap(
 			// Create a new annotation group, optionally create a new series if none is specified.
 			case 'create':
 				// `crypto.randomUUID()` is only available in secure contexts, so we use `Math.random()` as a fallback
-				const randomUUID = (() => crypto.randomUUID()) || (() => Math.random().toString(36).substring(2));
-				const seriesUid = action.seriesUid || `draft-series-${randomUUID()}`;
-				const groupUid = `draft-group-${randomUUID()}`;
+				const randomUid = () => (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2));
+				const seriesUid = action.seriesUid || `draft-series-${randomUid()}`;
+				const groupUid = `draft-group-${randomUid()}`;
 				annotationMap[seriesUid] ||= { editable: true, groupMap: {} };
 				const annotation: Annotation = {
 					...action.annotation,
