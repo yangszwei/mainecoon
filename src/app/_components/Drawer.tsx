@@ -139,7 +139,7 @@ export default function Drawer({ className, placement, children }: Readonly<Draw
 
 			{/* Drawer content */}
 			<div className={isHidden ? 'hidden' : 'contents'}>
-				<div className="h-full overflow-auto bg-white shadow-sm" style={{ width }}>
+				<div className="flex h-full flex-col overflow-auto bg-white shadow-sm" style={{ width }}>
 					{children}
 				</div>
 				<div
