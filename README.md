@@ -80,3 +80,7 @@ NEXT_PUBLIC_DICOMWEB_SERVERS="name1=https://server1.com,name2=https://server2.co
 The following variables are used to configure the runtime settings:
 
 - `PORT`: The port number the server listens on (default: `3000`).
+
+## License
+
+This project is licensed under the [Apache License 2.0](./LICENSE).
