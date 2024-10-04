@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "next dev",
 		"build": "next build",
-		"start": "next start",
+		"start": "node .next/standalone/server.js",
 		"lint": "prettier --check . && next lint",
 		"format": "prettier --write .",
 		"prepare": "git config core.hooksPath .githooks"
