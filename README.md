@@ -15,7 +15,7 @@ Mainecoon is a powerful web-based digital pathology viewer, designed to allow re
 
 ## Installation
 
-Before starting, ensure you have configured the build arguments in the `.env` file (refer to the [Configuration](#configuration) section for more details).
+Before starting, ensure you have configured the environment variables as needed. See the [Configuration](#configuration) section for more information.
 
 ### Docker
 
@@ -50,7 +50,7 @@ cp -r .next/static .next/standalone/.next/static
 cp -r public .next/standalone/public
 ```
 
-### Running
+#### Running
 
 ```bash
 npm start
@@ -59,6 +59,10 @@ npm start
 The viewer should now be accessible at [http://localhost:3000](http://localhost:3000).
 
 ## Configuration
+
+### Example
+
+See the [.env.example](./.env.example) file for an example configuration.
 
 ### Build Arguments
 
