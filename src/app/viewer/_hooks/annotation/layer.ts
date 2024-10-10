@@ -18,7 +18,7 @@ import { decodeValue } from '@/lib/dicom-web/vr';
 import { imageLayerThreshold } from '@/lib/constants';
 import { multipartDecode } from '@/lib/utils/multipart';
 
-type AnnotationLayer = VectorLayer<Feature<Geometry>> | VectorImageLayer<Feature<Geometry>>;
+type AnnotationLayer = VectorLayer | VectorImageLayer<Feature<Geometry>>;
 
 export function useAnnotationLayers(
 	mapRef: MutableRefObject<ol.Map | null>,

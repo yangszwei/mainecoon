@@ -7,7 +7,7 @@ import type { DicomServer } from '@/config/dicom-web';
 import type { ImageTile } from 'ol';
 import { Projection } from 'ol/proj';
 import { TileGrid } from 'ol/tilegrid';
-import TileLayer from 'ol/layer/WebGLTile';
+import TileLayer from 'ol/layer/Tile';
 import { XYZ } from 'ol/source';
 import { getCenter } from 'ol/extent';
 
