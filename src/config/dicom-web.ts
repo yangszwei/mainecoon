@@ -6,6 +6,10 @@ export const servers: { [name: string]: DicomServer } = (() => {
 	const servers: { [name: string]: DicomServer } = {};
 
 	const serversString = process.env.NEXT_PUBLIC_DICOMWEB_SERVERS || '';
+	if (!serversString) {
+		return servers;
+	}
+
 	for (const serverString of serversString.split(',')) {
 		const parts = serverString.split('=');
 		let [name, url] = parts.length > 1 ? parts : [new URL(parts[0]).host, parts[0]];

@@ -5,7 +5,7 @@ import { allowInsecureRequests, discovery } from 'openid-client';
 import { cookies } from 'next/headers';
 
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-const origin = new URL(basePath + '/', process.env.ORIGIN || '').href;
+const origin = new URL(basePath + '/', process.env.ORIGIN || 'http://localhost:3000').href;
 
 /** Whether authentication is enabled */
 export const isAuthEnabled = process.env.AUTH_ENABLED === 'true';
