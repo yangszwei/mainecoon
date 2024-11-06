@@ -83,7 +83,13 @@ NEXT_PUBLIC_DICOMWEB_SERVERS="name1=https://server1.com,name2=https://server2.co
 
 The following variables are used to configure the runtime settings:
 
+- `ORIGIN`: The origin used to determine the base URL of the viewer.
 - `PORT`: The port number the server listens on (default: `3000`).
+- `AUTH_ENABLED`: Boolean flag to enable or disable authentication (default: false).
+- `AUTH_SECRET`: Secret key used to encrypt session data.
+- `OIDC_ISSUER`: The issuer URL for the OpenID Connect provider.
+- `OIDC_CLIENT_ID`: The client ID for the OpenID Connect provider.
+- `OIDC_CLIENT_SECRET`: The client secret for the OpenID Connect provider.
 
 ## License
 
