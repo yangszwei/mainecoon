@@ -1,7 +1,17 @@
 services:
+  collector:
+    image: jaegertracing/jaeger:2.1.0
+    restart: unless-stopped
+    depends_on:
+      - mainecoon
+    ports:
+      - '16686:16686'
+
   mainecoon:
     build: .
     restart: unless-stopped
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://collector:4318
     env_file:
       - path: .env
         required: false
