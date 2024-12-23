@@ -160,8 +160,8 @@ export function useMap(id: string, server: DicomServer, slide: DicomJson | null)
 	const [resolutions, setResolutions] = useState<{ [instanceUid: string]: number }>({});
 	const [loading, setLoading] = useState(true);
 
-	// The time it took to load the first tile
-	let timeToFirstTime = 0;
+	// A flag indicating whether the first tile has been loaded
+	let isFirstTile = true;
 
 	useEffect(() => {
 		async function loadMap() {
@@ -213,13 +213,14 @@ export function useMap(id: string, server: DicomServer, slide: DicomJson | null)
 								if (!response.ok) {
 									throw new Error(`Failed to fetch tile: [${response.status}] ${response.statusText}`);
 								}
-								if (!timeToFirstTime) {
-									const elapsed = Date.now() - performance.now();
-
-									// eslint-disable-next-line no-console
-									console.debug(`First tile loaded in ${elapsed}ms for slide ${src}`);
-
-									timeToFirstTime = elapsed;
+								if (isFirstTile) {
+									const timing = performance.getEntriesByName(src)?.[0] as PerformanceResourceTiming | undefined;
+									const frame = src.match(/\/frames\/(\d)/)?.[1];
+									if (timing) {
+										// eslint-disable-next-line no-console
+										console.debug(`🕐 First tile loaded in ${timing.responseEnd}ms for frame ${frame}`, timing);
+										isFirstTile = false;
+									}
 								}
 								return response.blob(); // Convert the response to a blob
 							})
