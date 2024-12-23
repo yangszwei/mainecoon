@@ -201,8 +201,20 @@ export function useMap(id: string, server: DicomServer, slide: DicomJson | null)
 				source: new XYZ({
 					tileLoadFunction: (tile, src) => {
 						const image = (tile as ImageTile).getImage() as HTMLImageElement;
-						image.src = src;
-						image.fetchPriority = 'high';
+
+						fetch(src, {
+							headers: { Accept: 'multipart/related; type="image/jpeg"' },
+							priority: 'high',
+						})
+							.then((response) => {
+								if (!response.ok) {
+									throw new Error(`Failed to fetch tile: [${response.status}] ${response.statusText}`);
+								}
+								return response.blob(); // Convert the response to a blob
+							})
+							.then((blob) => {
+								image.src = URL.createObjectURL(blob);
+							});
 					},
 					tileUrlFunction: ([z, x, y]: number[]) => {
 						const image = images.volumes[z];
